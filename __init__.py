@@ -27,10 +27,10 @@ class RonjaSkill(OVOSSkill):
             random.shuffle(combined)
             questions, correct_answers = zip(*combined)
 
-            audio_files = round_data['audio_files']
             return (
                 questions,
-                self.root_dir + audio_files['main_question'],
+                correct_answers,
+                self.root_dir + round_data['main_question'],
             )
         else:
             LOG.error(f"No data found for round {round_num}")
@@ -86,7 +86,7 @@ class RonjaSkill(OVOSSkill):
         total_rounds = 5
 
         self.gui.show_text("Raad het geluid", override_idle=True)
-        self.play_audio(f"{self.root_dir}/assets/audio/effects/intro/intro.mp3", wait=24)
+        # self.play_audio(f"{self.root_dir}/assets/audio/effects/intro/intro.mp3", wait=24)
 
         intro_played = True
 
@@ -96,19 +96,14 @@ class RonjaSkill(OVOSSkill):
                 self.current_round = round_num
 
                 self.gui.show_text(f"Ronde {round_num + 1}")
-                self.play_audio(f"{self.root_dir}assets/audio/effects/continue/geluid1.mp3", 2)
+                self.play_audio(f"{self.root_dir}/assets/audio/effects/continue/geluid1.mp3", wait=4)
 
-                # \questions, correct_answers, main_question, = self.generate_round_data(round_num)
+                questions, correct_answers, main_question, = self.generate_round_data(round_num)
 
-                
+                self.play_main_question(main_question, 5)
 
-                # for question, correct_answer, question_audio_file in zip(questions, correct_answers, question_audio_files):
-                #     if not intro_played and not self.skip_intro:
-                #         self.play_intro(intro, duration_intro)
-                #         intro_played = True
-
-                    
-                #         self.play_main_question(main_question, duration_main)
+                # for question, correct_answer in zip(questions, correct_answers):
+                #     self.play_main_question(main_question, 5)
 
                 #     self.play_question_answer(question, question_audio_file, duration_answers)
 

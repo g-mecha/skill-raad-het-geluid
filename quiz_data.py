@@ -1,13 +1,11 @@
 rounds_data = {
-    0: {
+    0: { #fietsbel
         'questions': [
             "Is dit een fietsbel?",
             "Is dit een deurbel?",
             "Is dit een koebel?"
         ],
         'correct_answers': [True, False, False],
-        'audio_files': {
-            'main_question': "/scene0/tutorialq.mp3",
-        }
+        'main_question': "/assets/audio/questions/Fietsbel.mp3",
     },
 }
