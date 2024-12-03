@@ -138,7 +138,14 @@ class RonjaSkill(OVOSSkill):
                     return
 
             # self.set_skip_intro(False)
-        self.gui.show_text(f"Einde: {self.points}")
+        
+        if (self.points == 1):
+            self.gui.show_text("Je hebt een punt gescoord")
+            self.play_audio(f"{self.root_dir}/assets/audio/effects/outro/einde1punt.mp3", wait=16)
+        else:
+            self.gui.show_text(f"Je hebt {self.points} punten gescoord")
+            self.play_audio(f"{self.root_dir}/assets/audio/effects/outro/einde{self.points}punten.mp3", wait=16)
+            
 
     def stop(self):
         time.sleep(2)
