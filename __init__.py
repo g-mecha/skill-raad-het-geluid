@@ -13,6 +13,7 @@ class RonjaSkill(OVOSSkill):
 
     def initialize(self):
         self.current_round = 0
+        self.intro_played = False
         self.stop_called = False
         self.skip_intro = False  # Initialize the variable
         
@@ -21,33 +22,15 @@ class RonjaSkill(OVOSSkill):
         if round_data:
             questions = round_data['questions']
             correct_answers = round_data['correct_answers']
-            question_audio_files = round_data['audio_files']['question_audio_files']
 
-            # Convert relative paths to absolute paths
-            question_audio_files = [self.root_dir + file_path for file_path in question_audio_files]
-            for file_path in question_audio_files:
-                LOG.info(f"Chosen audio file: {file_path}")
-
-            combined = list(zip(questions, correct_answers, question_audio_files))
+            combined = list(zip(questions, correct_answers))
             random.shuffle(combined)
-            questions, correct_answers, question_audio_files = zip(*combined)
+            questions, correct_answers = zip(*combined)
 
             audio_files = round_data['audio_files']
             return (
                 questions,
-                correct_answers,
-                question_audio_files,
-                self.root_dir + audio_files['correct_answer_audio'],
-                self.root_dir + audio_files['false_answer_audio'],
-                self.root_dir + audio_files['intro'],
-                self.root_dir + audio_files['outro'],
                 self.root_dir + audio_files['main_question'],
-                audio_files['duration_intro'],
-                audio_files['duration_outro'],
-                audio_files['duration_main'],
-                audio_files['duration_correct'],
-                audio_files['duration_false'],
-                audio_files['duration_answers']
             )
         else:
             LOG.error(f"No data found for round {round_num}")
@@ -100,54 +83,59 @@ class RonjaSkill(OVOSSkill):
                 time.sleep(0.1)
 
     def play_game(self):
-        total_rounds = 12
+        total_rounds = 5
 
-        self.play_audio(f"{self.root_dir}/assets/audio/effects/intro/intro.mp3")
+        self.gui.show_text("Raad het geluid", override_idle=True)
+        self.play_audio(f"{self.root_dir}/assets/audio/effects/intro/intro.mp3", wait=24)
 
-        for round_num in range(0, total_rounds + 1):
-            self.current_round = round_num
+        intro_played = True
 
-            self.gui.show_text(f"Round {round_num}:")
-            self.gui.show_text("Raad het geluid", override_idle=True)
+        if intro_played:
 
-            # questions, correct_answers, question_audio_files, correct_answer_audio, false_answer_audio, intro, outro, main_question, duration_intro, duration_outro, duration_main, duration_correct, duration_false, duration_answers = self.generate_round_data(round_num)
+            for round_num in range(0, total_rounds):
+                self.current_round = round_num
 
-            # intro_played = False
+                self.gui.show_text(f"Ronde {round_num + 1}")
+                self.play_audio(f"{self.root_dir}assets/audio/effects/continue/geluid1.mp3", 2)
 
-            # for question, correct_answer, question_audio_file in zip(questions, correct_answers, question_audio_files):
-            #     if not intro_played and not self.skip_intro:
-            #         self.play_intro(intro, duration_intro)
-            #         intro_played = True
+                # \questions, correct_answers, main_question, = self.generate_round_data(round_num)
 
-            #     if intro_played:
-            #         self.play_main_question(main_question, duration_main)
+                
 
-            #     self.play_question_answer(question, question_audio_file, duration_answers)
+                # for question, correct_answer, question_audio_file in zip(questions, correct_answers, question_audio_files):
+                #     if not intro_played and not self.skip_intro:
+                #         self.play_intro(intro, duration_intro)
+                #         intro_played = True
 
-            #     reply = None
-            #     while reply not in ['ja', 'nee', 'stop']:
-            #         response = self.get_response()
+                    
+                #         self.play_main_question(main_question, duration_main)
 
-            #         if response:
-            #             reply = response.lower()
-            #         else:
-            #             self.speak("Kies maar, ja of nee.")
+                #     self.play_question_answer(question, question_audio_file, duration_answers)
 
-            #     if reply == 'ja' and correct_answer:
-            #         self.play_correct_answer(correct_answer_audio, duration_correct)
-            #         self.play_outro(outro, duration_outro)
-            #         break
-            #     elif (reply == 'ja' and not correct_answer) or (reply == 'nee' and correct_answer):
-            #         self.play_false_answer(false_answer_audio, duration_false)
-            #         self.play_outro(outro, duration_outro)
-            #         break
-            #     elif reply == 'stop':
-            #         return
-            #     elif round_num == total_rounds:
-            #         self.gui.show_text('Einde', override_idle=True)
-            #         return
+                #     reply = None
+                #     while reply not in ['ja', 'nee', 'stop']:
+                #         response = self.get_response()
 
-            self.set_skip_intro(False)
+                #         if response:
+                #             reply = response.lower()
+                #         else:
+                #             self.speak("Kies maar, ja of nee.")
+
+                #     if reply == 'ja' and correct_answer:
+                #         self.play_correct_answer(correct_answer_audio, duration_correct)
+                #         self.play_outro(outro, duration_outro)
+                #         break
+                #     elif (reply == 'ja' and not correct_answer) or (reply == 'nee' and correct_answer):
+                #         self.play_false_answer(false_answer_audio, duration_false)
+                #         self.play_outro(outro, duration_outro)
+                #         break
+                #     elif reply == 'stop':
+                #         return
+                #     elif round_num == total_rounds:
+                #         self.gui.show_text('Einde', override_idle=True)
+                #         return
+
+                # self.set_skip_intro(False)
 
     def stop(self):
         time.sleep(2)
