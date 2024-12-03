@@ -100,6 +100,9 @@ class RonjaSkill(OVOSSkill):
         for round_num in range(0, total_rounds):
             self.current_round = round_num
 
+            if round_num == total_rounds:
+                break
+
             self.gui.show_text(f"Ronde {round_num + 1}")
             self.play_audio(f"{self.root_dir}/assets/audio/effects/continue/geluid{round_num+1}.mp3", wait=4)
 
@@ -133,11 +136,9 @@ class RonjaSkill(OVOSSkill):
                     break
                 elif reply == 'stop':
                     return
-                elif round_num == total_rounds:
-                    self.gui.show_text('Einde', override_idle=True)
-                    return
 
             # self.set_skip_intro(False)
+        self.gui.show_text(f"Einde: {self.points}")
 
     def stop(self):
         time.sleep(2)
