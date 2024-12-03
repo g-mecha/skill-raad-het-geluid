@@ -13,9 +13,8 @@ class RonjaSkill(OVOSSkill):
 
     def initialize(self):
         self.current_round = 0
-        self.intro_played = False
+        self.points = 0
         self.stop_called = False
-        self.skip_intro = False  # Initialize the variable
         
     def generate_round_data(self, round_num):
         round_data = rounds_data.get(round_num)
@@ -65,6 +64,14 @@ class RonjaSkill(OVOSSkill):
         self.speak(question)
         time.sleep(duration_answers)
 
+    def play_answer_response(self, wasCorrect):
+        if (wasCorrect):
+            self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/subgoed1.mp3", wait=4)
+        else:
+            self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/fout1.mp3", wait=4)
+
+
+
     def play_correct_answer(self, correct_answer_audio, duration_correct):
         self.play_audio(correct_answer_audio)
         time.sleep(duration_correct)
@@ -88,49 +95,47 @@ class RonjaSkill(OVOSSkill):
         self.gui.show_text("Raad het geluid", override_idle=True)
         # self.play_audio(f"{self.root_dir}/assets/audio/effects/intro/intro.mp3", wait=24)
 
-        intro_played = True
+        for round_num in range(0, total_rounds):
+            self.current_round = round_num
 
-        if intro_played:
+            self.gui.show_text(f"Ronde {round_num + 1}")
+            # self.play_audio(f"{self.root_dir}/assets/audio/effects/continue/geluid1.mp3", wait=4)
 
-            for round_num in range(0, total_rounds):
-                self.current_round = round_num
+            questions, correct_answers, main_question, = self.generate_round_data(round_num)
 
-                self.gui.show_text(f"Ronde {round_num + 1}")
-                self.play_audio(f"{self.root_dir}/assets/audio/effects/continue/geluid1.mp3", wait=4)
+            # TODO: hardcoded audio lenght, fix in data fiel like Ronja
+            # self.play_main_question(main_question, 6)
 
-                questions, correct_answers, main_question, = self.generate_round_data(round_num)
+            for question, correct_answer in zip(questions, correct_answers):
+                self.play_question_answer(question, 3)
 
-                # TODO: hardcoded audio lenght
-                self.play_main_question(main_question, 6)
+                reply = None
+                while reply not in ['ja', 'nee', 'stop','herhaal']:
+                    response = self.get_response()
 
-                for question, correct_answer in zip(questions, correct_answers):
-                    self.play_question_answer(question, 3)
+                    if response:
+                        reply = response.lower()
+                    else:
+                        self.speak("Kies maar, ja of nee.")
 
-                    reply = None
-                    while reply not in ['ja', 'nee', 'stop','herhaal']:
-                        response = self.get_response()
+                # TODO: fix this from going to the next question
+                # if reply == 'herhaal':
+                #     self.play_main_question(main_question, 6)
 
-                        if response:
-                            reply = response.lower()
-                        else:
-                            self.speak("Kies maar, ja of nee.")
 
-                    if reply == 'ja' and correct_answer:
-                        # self.play_correct_answer(correct_answer_audio, duration_correct)
-                        self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/subgoed1.mp3", wait=4)
+                if reply == 'ja' and correct_answer:
+                    self.play_answer_response(True)
+                    break
+                elif (reply == 'ja' and not correct_answer) or (reply == 'nee' and correct_answer):
+                    self.play_answer_response(False)
+                    break
+                elif reply == 'stop':
+                    return
+                elif round_num == total_rounds:
+                    self.gui.show_text('Einde', override_idle=True)
+                    return
 
-                        break
-                    elif (reply == 'ja' and not correct_answer) or (reply == 'nee' and correct_answer):
-                        self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/fout1.mp3", wait=4)
-                        # self.play_false_answer(false_answer_audio, duration_false)
-                        break
-                    elif reply == 'stop':
-                        return
-                    elif round_num == total_rounds:
-                        self.gui.show_text('Einde', override_idle=True)
-                        return
-
-                # self.set_skip_intro(False)
+            # self.set_skip_intro(False)
 
     def stop(self):
         time.sleep(2)
