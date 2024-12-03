@@ -37,7 +37,7 @@ rounds_data = {
             "Is dit een vliegtuig?",
             "Is dit een boot?",
             "Is dit een race auto?",
-            "Is dit een Tank?"
+            "Is dit een tank?"
         ],
         'correct_answers': [True, False, False, False, False],
         'main_question': "/assets/audio/questions/Helicopter.mp3",
@@ -51,6 +51,6 @@ rounds_data = {
             "Is dit een accordeon?",
         ],
         'correct_answers': [True, False, False, False, False],
-        'main_question': "/assets/audio/questions/Gitaar.mp4",
+        'main_question': "/assets/audio/questions/Gitaar.mp3",
     },
 }

@@ -66,7 +66,9 @@ class RonjaSkill(OVOSSkill):
 
     def play_answer_response(self, wasCorrect):
         if (wasCorrect):
+            self.points+=1
             self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/subgoed1.mp3", wait=4)
+            
         else:
             self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/fout1.mp3", wait=4)
 
@@ -99,12 +101,12 @@ class RonjaSkill(OVOSSkill):
             self.current_round = round_num
 
             self.gui.show_text(f"Ronde {round_num + 1}")
-            # self.play_audio(f"{self.root_dir}/assets/audio/effects/continue/geluid1.mp3", wait=4)
+            self.play_audio(f"{self.root_dir}/assets/audio/effects/continue/geluid{round_num+1}.mp3", wait=4)
 
             questions, correct_answers, main_question, = self.generate_round_data(round_num)
 
-            # TODO: hardcoded audio lenght, fix in data fiel like Ronja
-            # self.play_main_question(main_question, 6)
+            # TODO: hardcoded audio lenght, fix in data file like Ronja
+            self.play_main_question(main_question, 6)
 
             for question, correct_answer in zip(questions, correct_answers):
                 self.play_question_answer(question, 3)
