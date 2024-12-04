@@ -68,28 +68,12 @@ class RonjaSkill(OVOSSkill):
         if (wasCorrect):
             self.points+=1
             self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/subgoed1.mp3", wait=4)
-            
         else:
             self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/fout1.mp3", wait=4)
 
+    def unadle_user_input(self):
+        print("1234");
 
-
-    def play_correct_answer(self, correct_answer_audio, duration_correct):
-        self.play_audio(correct_answer_audio)
-        time.sleep(duration_correct)
-        self.gui.show_text('Goed!', override_idle=True)
-
-    def play_false_answer(self, false_answer_audio, duration_false):
-        self.play_audio(false_answer_audio)
-        self.gui.show_text('Ronja', override_idle=True)
-        time.sleep(duration_false)
-
-    def play_outro(self, outro, duration_outro):
-        if outro:
-            self.play_audio(outro)
-            time_end = time.time() + duration_outro
-            while time.time() < time_end and not self.skip_intro:
-                time.sleep(0.1)
 
     def play_game(self):
         total_rounds = 5
