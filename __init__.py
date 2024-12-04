@@ -15,7 +15,7 @@ class RonjaSkill(OVOSSkill):
         self.current_round = 0
         self.points = 0
         self.stop_called = False
-        # self.reply = None
+        self.reply = None
         
     def generate_round_data(self, round_num):
         round_data = rounds_data.get(round_num)
@@ -66,7 +66,7 @@ class RonjaSkill(OVOSSkill):
         time.sleep(duration_answers)
 
     def play_answer_response(self, wasCorrect):
-        # self.reply = None
+        self.reply = None
         message_number = random.randint(1, 5)
         if (wasCorrect):
             self.points+=1
@@ -102,36 +102,24 @@ class RonjaSkill(OVOSSkill):
             for question, correct_answer in zip(questions, correct_answers):
                 self.play_question_answer(question, 3)
 
-                # while self.reply == None:
-                #     response = self.get_response().lower()
-                #     if (response == 'ja'): self.reply = 'ja'
-                #     elif (response == 'nee'): self.reply = 'nee'
-                #     elif (response == 'herhaal'): self.play_main_question(main_question, 6)
-                #     else: self.speak("Kies maar, ja of nee.")
-                # #     
-                reply = None
-
-                while reply not in ['ja', 'nee', 'stop','herhaal']:
-                    response = self.get_response()
-
-                    if response:
-                        reply = response.lower()
-                    else:
-                        self.speak("Kies maar, ja of nee.")
-
-                # # TODO: fix this from going to the next question
-                # # if reply == '':
-                # #     
+                while self.reply == None:
+                    response = self.get_response().lower()
+                    if (response == 'ja'): self.reply = 'ja'
+                    elif (response == 'nee'): self.reply = 'nee'
+                    elif (response == 'herhaal'): self.play_main_question(main_question, 6)
+                    else: self.speak("Kies ja of nee. zeg herhaal as je het geluid opniuew wilt horen")
 
 
-                if reply == 'ja' and correct_answer:
+                if self.reply == 'ja' and correct_answer:
                     self.play_answer_response(True)
                     break
-                elif (reply == 'ja' and not correct_answer) or (reply == 'nee' and correct_answer):
+                elif (self.reply == 'ja' and not correct_answer) or (self.reply == 'nee' and correct_answer):
                     self.play_answer_response(False)
                     break
-                elif reply == 'stop':
+                elif self.reply == 'stop':
                     return
+                ## Set reply to none so that the player can still play the game
+                elif (self.reply == 'nee' and not correct_answer): self.reply = None
 
             # self.set_skip_intro(False)
         
