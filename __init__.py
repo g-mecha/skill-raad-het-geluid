@@ -15,6 +15,7 @@ class RonjaSkill(OVOSSkill):
         self.current_round = 0
         self.points = 0
         self.stop_called = False
+        # self.reply = None
         
     def generate_round_data(self, round_num):
         round_data = rounds_data.get(round_num)
@@ -65,14 +66,17 @@ class RonjaSkill(OVOSSkill):
         time.sleep(duration_answers)
 
     def play_answer_response(self, wasCorrect):
+        # self.reply = None
+        message_number = random.randint(1, 5)
         if (wasCorrect):
             self.points+=1
-            self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/subgoed1.mp3", wait=4)
+            self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/goed{message_number}.mp3", wait=4)
         else:
-            self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/fout1.mp3", wait=4)
+            self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/fout{message_number}.mp3", wait=4)
 
-    def unadle_user_input(self):
-        print("1234");
+    # def handle_user_responce(self, response):
+
+        # elif (response == 'herhaal'):
 
 
     def play_game(self):
@@ -98,7 +102,15 @@ class RonjaSkill(OVOSSkill):
             for question, correct_answer in zip(questions, correct_answers):
                 self.play_question_answer(question, 3)
 
+                # while self.reply == None:
+                #     response = self.get_response().lower()
+                #     if (response == 'ja'): self.reply = 'ja'
+                #     elif (response == 'nee'): self.reply = 'nee'
+                #     elif (response == 'herhaal'): self.play_main_question(main_question, 6)
+                #     else: self.speak("Kies maar, ja of nee.")
+                # #     
                 reply = None
+
                 while reply not in ['ja', 'nee', 'stop','herhaal']:
                     response = self.get_response()
 
@@ -107,9 +119,9 @@ class RonjaSkill(OVOSSkill):
                     else:
                         self.speak("Kies maar, ja of nee.")
 
-                # TODO: fix this from going to the next question
-                # if reply == 'herhaal':
-                #     self.play_main_question(main_question, 6)
+                # # TODO: fix this from going to the next question
+                # # if reply == '':
+                # #     
 
 
                 if reply == 'ja' and correct_answer:
