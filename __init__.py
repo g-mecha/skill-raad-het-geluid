@@ -70,13 +70,11 @@ class RonjaSkill(OVOSSkill):
         message_number = random.randint(1, 5)
         if (wasCorrect):
             self.points+=1
+            self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/sfx-correct.mp3", wait=.5)
             self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/goed{message_number}.mp3", wait=4)
         else:
+            self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/sfx-wrong.mp3", wait=.5)
             self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/fout{message_number}.mp3", wait=4)
-
-    # def handle_user_responce(self, response):
-
-        # elif (response == 'herhaal'):
 
 
     def play_game(self):
