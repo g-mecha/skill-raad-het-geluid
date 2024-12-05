@@ -12,14 +12,22 @@ class RaadHetGeluidSkill(OVOSSkill):
         super().__init__(*args, **kwargs)
 
     def initialize(self):
+        #Round variables
         self.current_round = 0
         self.points = 0
-        self.stop_called = False
+
+        #input variables
         self.reply = None
 
-        #intro stuff
-        self.skip_intro = True #Debug funcion, keep this True for the release version
+        #Intro variables
+        self.skip_intro = True #Debug funcion, set this to False for the release version
         self.intro_played = False
+
+#<editor-fold desc="intents">
+    @intent_handler("StartQuiz.intent")
+    @killable_intent(msg='recognizer_loop:wakeword')
+    def start_quiz(self):
+        self.play_intro()
 
     #TODO: figure out while this still works despite intro_played being set to False
     # @intent_handler("SkipIntro.intent")
@@ -28,10 +36,12 @@ class RaadHetGeluidSkill(OVOSSkill):
     #         self.intro_played = True
     #         self.bus.emit(Message("mycroft.audio.speech.stop"))
 
-    @intent_handler("StartQuiz.intent")
-    @killable_intent(msg='recognizer_loop:wakeword')
-    def start_quiz(self):
-        self.play_intro()
+    # @intent_handler("EndGame.intent")
+    # @killable_intent(msg='recognizer_loop:wakeword')
+    # def start_quiz(self):
+    #     self.play_intro()
+
+#</editor-fold>
         
     def generate_round_data(self, round_num):
         round_data = questions_data.get(round_num)
@@ -62,11 +72,11 @@ class RaadHetGeluidSkill(OVOSSkill):
         self.intro_played = True
         self.play_game()
 
-    def play_main_question(self, main_question, duration_main):
+    def play_sound_audioclip(self, main_question, duration_main):
         self.play_audio(main_question)
         time.sleep(duration_main)
 
-    def play_question_answer(self, question, duration_answers):
+    def play_sound_question(self, question, duration_answers):
         self.gui.show_text(question, override_idle=True)
         self.speak(question)
         time.sleep(duration_answers)
@@ -95,6 +105,7 @@ class RaadHetGeluidSkill(OVOSSkill):
         for round_num in range(0, total_rounds):
             self.current_round = round_num
 
+            # The player has reached the end of the game, quit the loop
             if round_num == total_rounds:
                 break
 
@@ -103,11 +114,12 @@ class RaadHetGeluidSkill(OVOSSkill):
 
             questions, correct_answers, main_question, question_duration = self.generate_round_data(questions_to_use[round_num])
 
-            self.play_main_question(main_question, question_duration)
+            self.play_sound_audioclip(main_question, question_duration)
 
             for question, correct_answer in zip(questions, correct_answers):
-                self.play_question_answer(question, 3)
+                self.play_sound_question(question, 3)
 
+                # Keep looking for a response until we have a valid one
                 while self.reply == None:
                     # I'm not sure how this works but putting this empty string here prevents the player
                     # from exiting the for loop while using the wake word to give an answer if they
@@ -117,7 +129,7 @@ class RaadHetGeluidSkill(OVOSSkill):
                     response = self.get_response("").lower()
                     if (response == 'ja'): self.reply = 'ja'
                     elif (response == 'nee'): self.reply = 'nee'
-                    elif (response == 'herhaal'): self.play_main_question(main_question, question_duration)
+                    elif (response == 'herhaal'): self.play_sound_audioclip(main_question, question_duration)
                     else: self.speak("Kies ja of nee. zeg herhaal als je het geluid opniuew wilt horen")
 
 
@@ -134,6 +146,7 @@ class RaadHetGeluidSkill(OVOSSkill):
 
             # self.set_skip_intro(False)
         
+        # End of the game
         if (self.points == 1):
             self.gui.show_text("Je hebt een punt gescoord")
             self.play_audio(f"{self.root_dir}/assets/audio/effects/outro/einde1punt.mp3", wait=16)
@@ -144,11 +157,11 @@ class RaadHetGeluidSkill(OVOSSkill):
         while self.reply == None:
             response = self.get_response("").lower()
             if (response == 'ja'): self.play_game()
-            elif (response == 'nee'): self.stop()
+            elif (response == 'nee'): self.end_game()
             else: self.speak("Kies ja of nee.")            
     
 
-    def stop(self):
+    def end_game(self):
         while self.reply == None:
             response = self.get_response().lower()
             self.speak(response)
