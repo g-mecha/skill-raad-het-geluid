@@ -7,7 +7,7 @@ from ovos_workshop.decorators import killable_intent, killable_event
 from .quiz_data import rounds_data
 import random
 
-class RonjaSkill(OVOSSkill):
+class RaadHetGeluidSkill(OVOSSkill):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -16,6 +16,22 @@ class RonjaSkill(OVOSSkill):
         self.points = 0
         self.stop_called = False
         self.reply = None
+
+        #intro stuff
+        self.skip_intro = True #Debug funcion, keep this True for the release version
+        self.intro_played = False
+
+    #TODO: figure out while this still works despite intro_played being set to False
+    # @intent_handler("SkipIntro.intent")
+    # def skip_intro_intent(self):
+    #     if not self.intro_played:
+    #         self.intro_played = True
+    #         self.bus.emit(Message("mycroft.audio.speech.stop"))
+
+    @intent_handler("StartQuiz.intent")
+    @killable_intent(msg='recognizer_loop:wakeword')
+    def start_quiz(self):
+        self.play_intro()
         
     def generate_round_data(self, round_num):
         round_data = rounds_data.get(round_num)
@@ -36,25 +52,14 @@ class RonjaSkill(OVOSSkill):
             LOG.error(f"No data found for round {round_num}")
             return None
 
-    @intent_handler("SkipIntro.intent")
-    def skip_intro_intent(self):
-        self.set_skip_intro(True)
-        self.bus.emit(Message("mycroft.audio.speech.stop"))
+    def play_intro(self):
+        self.gui.show_text("Raad het geluid", override_idle=True)
+        # if self.intro_played:
+        if self.skip_intro == False:
+            self.play_audio(f"{self.root_dir}/assets/audio/effects/intro/intro.mp3", wait=24)
 
-    @intent_handler("StartQuiz.intent")
-    @killable_intent(msg='recognizer_loop:wakeword')
-    def start_quiz(self):
+        self.intro_played = True
         self.play_game()
-
-    def set_skip_intro(self, value):
-        self.skip_intro = value
-
-    def play_intro(self, intro, duration_intro):
-        if not self.skip_intro:
-            self.play_audio(intro)
-            time_end = time.time() + duration_intro
-            while time.time() < time_end and not self.skip_intro:
-                time.sleep(0.1)
 
     def play_main_question(self, main_question, duration_main):
         self.play_audio(main_question)
@@ -80,9 +85,6 @@ class RonjaSkill(OVOSSkill):
     def play_game(self):
         total_rounds = 5
 
-        self.gui.show_text("Raad het geluid", override_idle=True)
-        # self.play_audio(f"{self.root_dir}/assets/audio/effects/intro/intro.mp3", wait=24)
-
         for round_num in range(0, total_rounds):
             self.current_round = round_num
 
@@ -91,6 +93,10 @@ class RonjaSkill(OVOSSkill):
 
             self.gui.show_text(f"Ronde {round_num + 1}")
             self.play_audio(f"{self.root_dir}/assets/audio/effects/continue/geluid{round_num+1}.mp3", wait=4)
+
+            # TODO: need this later
+            # random.sample(range(1, 100), 3)
+            # [77, 52, 45]
 
             questions, correct_answers, main_question, = self.generate_round_data(round_num)
 
