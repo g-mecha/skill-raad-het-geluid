@@ -135,7 +135,13 @@ class RaadHetGeluidSkill(OVOSSkill):
         else:
             self.gui.show_text(f"Je hebt {self.points} punten gescoord")
             self.play_audio(f"{self.root_dir}/assets/audio/effects/outro/einde{self.points}punten.mp3", wait=16)
-            
+
+        while self.reply == None:
+            response = self.get_response().lower()
+            if (response == 'ja'): self.play_game()
+            elif (response == 'nee'): self.stop()
+            else: self.speak("Kies ja of nee.")            
+    
 
     def stop(self):
         time.sleep(2)
