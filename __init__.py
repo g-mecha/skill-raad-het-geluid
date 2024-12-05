@@ -103,18 +103,22 @@ class RaadHetGeluidSkill(OVOSSkill):
 
             questions, correct_answers, main_question, question_duration = self.generate_round_data(questions_to_use[round_num])
 
-            # TODO: hardcoded audio lenght, fix in data file like Ronja
             self.play_main_question(main_question, question_duration)
 
             for question, correct_answer in zip(questions, correct_answers):
                 self.play_question_answer(question, 3)
 
                 while self.reply == None:
-                    response = self.get_response().lower()
+                    # I'm not sure how this works but putting this empty string here prevents the player
+                    # from exiting the for loop while using the wake word to give an answer if they
+                    # failed to give an answer if the first called response window
+                    # This also prevents the skill from messing up the entire ovos installation should that happen
+                    # Do not remove please
+                    response = self.get_response("").lower()
                     if (response == 'ja'): self.reply = 'ja'
                     elif (response == 'nee'): self.reply = 'nee'
                     elif (response == 'herhaal'): self.play_main_question(main_question, question_duration)
-                    else: self.speak("Kies ja of nee. zeg herhaal as je het geluid opniuew wilt horen")
+                    else: self.speak("Kies ja of nee. zeg herhaal als je het geluid opniuew wilt horen")
 
 
                 if self.reply == 'ja' and correct_answer:
@@ -138,13 +142,17 @@ class RaadHetGeluidSkill(OVOSSkill):
             self.play_audio(f"{self.root_dir}/assets/audio/effects/outro/einde{self.points}punten.mp3", wait=16)
 
         while self.reply == None:
-            response = self.get_response().lower()
+            response = self.get_response("").lower()
             if (response == 'ja'): self.play_game()
             elif (response == 'nee'): self.stop()
             else: self.speak("Kies ja of nee.")            
     
 
-    # def stop(self):
+    def stop(self):
+        while self.reply == None:
+            response = self.get_response().lower()
+            self.speak(response)
+
     #     time.sleep(2)
     #     self.gui.show_text('', override_idle=3)
     #     return
