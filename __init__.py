@@ -47,6 +47,7 @@ class RaadHetGeluidSkill(OVOSSkill):
                 questions,
                 correct_answers,
                 self.root_dir + round_data['main_question'],
+                round_data['question_duration']
             )
         else:
             LOG.error(f"No data found for round {round_num}")
@@ -75,10 +76,10 @@ class RaadHetGeluidSkill(OVOSSkill):
         message_number = random.randint(1, 5)
         if (wasCorrect):
             self.points+=1
-            self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/sfx-correct.mp3", wait=.5)
+            self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/sfx-correct.mp3", wait=1)
             self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/goed{message_number}.mp3", wait=4)
         else:
-            self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/sfx-wrong.mp3", wait=.5)
+            self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/sfx-wrong.mp3", wait=1)
             self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/fout{message_number}.mp3", wait=4)
 
 
@@ -100,10 +101,10 @@ class RaadHetGeluidSkill(OVOSSkill):
             self.gui.show_text(f"Ronde {round_num + 1}")
             self.play_audio(f"{self.root_dir}/assets/audio/effects/continue/geluid{round_num+1}.mp3", wait=4)
 
-            questions, correct_answers, main_question, = self.generate_round_data(questions_to_use[round_num])
+            questions, correct_answers, main_question, question_duration = self.generate_round_data(questions_to_use[round_num])
 
             # TODO: hardcoded audio lenght, fix in data file like Ronja
-            self.play_main_question(main_question, 6)
+            self.play_main_question(main_question, question_duration)
 
             for question, correct_answer in zip(questions, correct_answers):
                 self.play_question_answer(question, 3)
@@ -112,7 +113,7 @@ class RaadHetGeluidSkill(OVOSSkill):
                     response = self.get_response().lower()
                     if (response == 'ja'): self.reply = 'ja'
                     elif (response == 'nee'): self.reply = 'nee'
-                    elif (response == 'herhaal'): self.play_main_question(main_question, 6)
+                    elif (response == 'herhaal'): self.play_main_question(main_question, question_duration)
                     else: self.speak("Kies ja of nee. zeg herhaal as je het geluid opniuew wilt horen")
 
 
@@ -143,7 +144,7 @@ class RaadHetGeluidSkill(OVOSSkill):
             else: self.speak("Kies ja of nee.")            
     
 
-    def stop(self):
-        time.sleep(2)
-        self.gui.show_text('', override_idle=3)
-        return
+    # def stop(self):
+    #     time.sleep(2)
+    #     self.gui.show_text('', override_idle=3)
+    #     return
