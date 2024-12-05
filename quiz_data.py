@@ -1,4 +1,4 @@
-rounds_data = {
+questions_data = {
     0: { #fietsbel
         'questions': [
             "Is dit een fietsbel?",
@@ -52,5 +52,26 @@ rounds_data = {
         ],
         'correct_answers': [True, False, False, False, False],
         'main_question': "/assets/audio/questions/Gitaar.mp3",
+    },
+    5: { #Toetsenbord
+    'questions': [
+        "Is dit een toetsenbord?",
+        "Is dit een ventilator?",
+        "Is dit een printer?",
+        "Is dit een mobiel?",
+    ],
+    'correct_answers': [True, False, False, False],
+    'main_question': "/assets/audio/questions/Typen_toetsenbord.mp3",
+    },
+    6: { #Schaap
+    'questions': [
+        "Is dit een schaap?",
+        "Is dit een varken?",
+        "Is dit een koe?",
+        "Is dit een paard?",
+        "Is dit een hond?",
+    ],
+    'correct_answers': [True, False, False, False, False],
+    'main_question': "/assets/audio/questions/Schapen.mp3",
     },
 }

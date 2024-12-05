@@ -4,7 +4,7 @@ import time
 from ovos_utils.log import LOG
 from ovos_bus_client.message import Message
 from ovos_workshop.decorators import killable_intent, killable_event
-from .quiz_data import rounds_data
+from .quiz_data import questions_data
 import random
 
 class RaadHetGeluidSkill(OVOSSkill):
@@ -34,7 +34,7 @@ class RaadHetGeluidSkill(OVOSSkill):
         self.play_intro()
         
     def generate_round_data(self, round_num):
-        round_data = rounds_data.get(round_num)
+        round_data = questions_data.get(round_num)
         if round_data:
             questions = round_data['questions']
             correct_answers = round_data['correct_answers']
@@ -85,6 +85,12 @@ class RaadHetGeluidSkill(OVOSSkill):
     def play_game(self):
         total_rounds = 5
 
+        # Get the number of questions in quiz_data
+        numbers_of_available_questions = len(questions_data)
+        # Generate a random list of questions to use
+        # This function will not create duplicates
+        questions_to_use = random.sample(range(0, numbers_of_available_questions), total_rounds)
+
         for round_num in range(0, total_rounds):
             self.current_round = round_num
 
@@ -94,11 +100,7 @@ class RaadHetGeluidSkill(OVOSSkill):
             self.gui.show_text(f"Ronde {round_num + 1}")
             self.play_audio(f"{self.root_dir}/assets/audio/effects/continue/geluid{round_num+1}.mp3", wait=4)
 
-            # TODO: need this later
-            # random.sample(range(1, 100), 3)
-            # [77, 52, 45]
-
-            questions, correct_answers, main_question, = self.generate_round_data(round_num)
+            questions, correct_answers, main_question, = self.generate_round_data(questions_to_use[round_num])
 
             # TODO: hardcoded audio lenght, fix in data file like Ronja
             self.play_main_question(main_question, 6)
