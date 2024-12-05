@@ -36,10 +36,10 @@ class RaadHetGeluidSkill(OVOSSkill):
     #         self.intro_played = True
     #         self.bus.emit(Message("mycroft.audio.speech.stop"))
 
-    # @intent_handler("EndGame.intent")
-    # @killable_intent(msg='recognizer_loop:wakeword')
-    # def start_quiz(self):
-    #     self.play_intro()
+    @intent_handler("StopPlaying.intent")
+    @killable_intent(msg='recognizer_loop:wakeword')
+    def stop_playing(self):
+        self.end_game()
 
 #</editor-fold>
         
@@ -139,8 +139,6 @@ class RaadHetGeluidSkill(OVOSSkill):
                 elif (self.reply == 'ja' and not correct_answer) or (self.reply == 'nee' and correct_answer):
                     self.play_answer_response(False)
                     break
-                elif self.reply == 'stop':
-                    return
                 ## Set reply to none so that the player can still play the game
                 elif (self.reply == 'nee' and not correct_answer): self.reply = None
 
@@ -162,10 +160,8 @@ class RaadHetGeluidSkill(OVOSSkill):
     
 
     def end_game(self):
-        while self.reply == None:
-            response = self.get_response().lower()
-            self.speak(response)
-
-    #     time.sleep(2)
-    #     self.gui.show_text('', override_idle=3)
-    #     return
+        # TODO prevent user input at this point
+        self.bus.emit(Message("mycroft.audio.speech.stop"))
+        self.gui.show_text("Bedankt voor het spelen")
+        self.speak("Bedankt voor het spelen van Raad het Geluid. Tot ziens!")
+        return
