@@ -15,18 +15,20 @@ class RaadHetGeluidSkill(OVOSSkill):
         #Round variables
         self.current_round = 0
         self.points = 0
+        self.player_quit = False
 
         #input variables
         self.reply = None
 
         #Intro variables
-        self.skip_intro = True #Debug funcion, set this to False for the release version
+        self.skip_intro = False #Debug funcion, set this to False for the release version
         self.intro_played = False
 
 #<editor-fold desc="intents">
     @intent_handler("StartQuiz.intent")
     @killable_intent(msg='recognizer_loop:wakeword')
     def start_quiz(self):
+        self.player_quit = False
         self.play_intro()
 
     #TODO: figure out while this still works despite intro_played being set to False
@@ -39,6 +41,7 @@ class RaadHetGeluidSkill(OVOSSkill):
     @intent_handler("StopPlaying.intent")
     @killable_intent(msg='recognizer_loop:wakeword')
     def stop_playing(self):
+        self.player_quit = True
         self.end_game()
 
 #</editor-fold>
@@ -106,7 +109,7 @@ class RaadHetGeluidSkill(OVOSSkill):
             self.current_round = round_num
 
             # The player has reached the end of the game, quit the loop
-            if round_num == total_rounds:
+            if round_num == total_rounds or self.player_quit == True:
                 break
 
             self.gui.show_text(f"Ronde {round_num + 1}")
@@ -160,7 +163,6 @@ class RaadHetGeluidSkill(OVOSSkill):
     
 
     def end_game(self):
-        # TODO prevent user input at this point
         self.bus.emit(Message("mycroft.audio.speech.stop"))
         self.gui.show_text("Bedankt voor het spelen")
         self.speak("Bedankt voor het spelen van Raad het Geluid. Tot ziens!")
