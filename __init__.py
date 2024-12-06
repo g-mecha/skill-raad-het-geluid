@@ -73,25 +73,23 @@ class RaadHetGeluidSkill(OVOSSkill):
         self.intro_played = True
         self.play_game()
 
-    def play_sound_audioclip(self, main_question, duration_main):
-        self.play_audio(main_question)
-        time.sleep(duration_main)
+    def play_sound_audioclip(self, main_question):
+        self.play_audio(main_question, wait=True)
 
-    def play_sound_question(self, question, duration_answers):
+    def play_sound_question(self, question):
         self.gui.show_text(question, override_idle=True)
-        self.speak(question)
-        time.sleep(duration_answers)
+        self.speak(question, wait=True)
 
     def play_answer_response(self, wasCorrect):
         self.reply = None
         message_number = random.randint(1, 5)
         if (wasCorrect):
             self.points+=1
-            self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/sfx-correct.mp3", wait=1)
-            self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/goed{message_number}.mp3", wait=4)
+            self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/sfx-correct.mp3", wait=True)
+            self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/goed{message_number}.mp3", wait=True)
         else:
-            self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/sfx-wrong.mp3", wait=1)
-            self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/fout{message_number}.mp3", wait=4)
+            self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/sfx-wrong.mp3", wait=True)
+            self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/fout{message_number}.mp3", wait=True)
 
 
     def play_game(self):
@@ -111,14 +109,14 @@ class RaadHetGeluidSkill(OVOSSkill):
                 break
 
             self.gui.show_text(f"Ronde {round_num + 1}")
-            self.play_audio(f"{self.root_dir}/assets/audio/effects/continue/geluid{round_num+1}.mp3", wait=4)
+            self.play_audio(f"{self.root_dir}/assets/audio/effects/continue/geluid{round_num+1}.mp3", wait=True)
 
             questions, correct_answers, main_question, question_duration = self.generate_round_data(questions_to_use[round_num])
 
-            self.play_sound_audioclip(main_question, question_duration)
+            self.play_sound_audioclip(main_question)
 
             for question, correct_answer in zip(questions, correct_answers):
-                self.play_sound_question(question, 3)
+                self.play_sound_question(question)
 
                 # Keep looking for a response until we have a valid one
                 while self.reply == None:
