@@ -21,12 +21,11 @@ class RaadHetGeluidSkill(OVOSSkill):
         self.reply = None
 
         #Intro variables
-        self.skip_intro = False #Debug funcion, set this to False for the release version
+        self.skip_intro = True #Debug funcion, set this to False for the release version
         self.intro_played = False
 
 #<editor-fold desc="intents">
     @intent_handler("StartQuiz.intent")
-    @killable_intent(msg='recognizer_loop:wakeword')
     def start_quiz(self):
         self.player_quit = False
         self.play_intro()
@@ -39,7 +38,6 @@ class RaadHetGeluidSkill(OVOSSkill):
     #         self.bus.emit(Message("mycroft.audio.speech.stop"))
 
     @intent_handler("StopPlaying.intent")
-    @killable_intent(msg='recognizer_loop:wakeword')
     def stop_playing(self):
         self.player_quit = True
         self.end_game()
@@ -130,10 +128,11 @@ class RaadHetGeluidSkill(OVOSSkill):
                     # This also prevents the skill from messing up the entire ovos installation should that happen
                     # Do not remove please
                     response = self.get_response("").lower()
-                    if (response == 'ja'): self.reply = 'ja'
-                    elif (response == 'nee'): self.reply = 'nee'
+                    if response in ['jazeker', 'ja zeker', 'ja zeker ja']: 
+                        self.reply = 'ja'
+                    elif (response == 'nee hoor'): self.reply = 'nee'
                     elif (response == 'herhaal'): self.play_sound_audioclip(main_question, question_duration)
-                    else: self.speak("Kies ja of nee. zeg herhaal als je het geluid opniuew wilt horen")
+                    else: self.speak("Dat begreep ik niet. Zeg jazeker of nee hoor. Zeg herhaal als je het geluid opnieuw wilt horen", expect_response=True, wait=True)
 
 
                 if self.reply == 'ja' and correct_answer:
@@ -166,4 +165,3 @@ class RaadHetGeluidSkill(OVOSSkill):
         self.bus.emit(Message("mycroft.audio.speech.stop"))
         self.gui.show_text("Bedankt voor het spelen")
         self.speak("Bedankt voor het spelen van Raad het Geluid. Tot ziens!")
-        return
