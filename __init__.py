@@ -92,6 +92,7 @@ class RaadHetGeluidSkill(OVOSSkill):
 
     def play_game(self):
         total_rounds = 5
+        self.player_quit = False
 
         # Get the number of questions in quiz_data
         numbers_of_available_questions = len(questions_data)
@@ -114,21 +115,23 @@ class RaadHetGeluidSkill(OVOSSkill):
             self.play_sound_audioclip(main_question)
 
             for question, correct_answer in zip(questions, correct_answers):
+                # Instantly end the runtime
+                if (self.player_quit == True): return
                 self.play_sound_question(question)
 
                 # Keep looking for a response until we have a valid one
                 while self.reply == None:
-                    # I'm not sure how this works but putting this empty string here prevents the player
-                    # from exiting the for loop while using the wake word to give an answer if they
-                    # failed to give an answer if the first called response window
-                    # This also prevents the skill from messing up the entire ovos installation should that happen
-                    # Do not remove please
-                    response = self.get_response("").lower()
+                    response = self.get_response().lower()
+                    # self.speak(response)
                     if response in ['jazeker', 'ja zeker', 'ja zeker ja']: 
                         self.reply = 'ja'
                     elif (response == 'nee hoor'): self.reply = 'nee'
                     elif (response == 'herhaal'): self.play_sound_audioclip(main_question)
-
+                    # End the program here when one fo the stop phrases is called
+                    # Yes we have to do this twice
+                    elif response in ['stop raad het geluid', 'stop met spelen', 'ik ben klaar']:
+                        self.end_game()
+                        return
                     else: self.speak("Dat begreep ik niet. Zeg jazeker of nee hoor. Zeg herhaal als je het geluid opnieuw wilt horen", expect_response=True, wait=True)
 
 
@@ -142,6 +145,8 @@ class RaadHetGeluidSkill(OVOSSkill):
                 elif (self.reply == 'nee' and not correct_answer): self.reply = None
 
             # self.set_skip_intro(False)
+
+        if (self.player_quit == True): return
         
         # End of the game
         if (self.points == 1):
@@ -162,3 +167,4 @@ class RaadHetGeluidSkill(OVOSSkill):
         self.bus.emit(Message("mycroft.audio.speech.stop"))
         self.gui.show_text("Bedankt voor het spelen")
         self.speak("Bedankt voor het spelen van Raad het Geluid. Tot ziens!")
+        
