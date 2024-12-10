@@ -1,6 +1,5 @@
 from ovos_workshop.skills import OVOSSkill
 from ovos_workshop.decorators import intent_handler
-import time
 from ovos_utils.log import LOG
 from ovos_bus_client.message import Message
 from ovos_workshop.decorators import killable_intent, killable_event
@@ -58,7 +57,6 @@ class RaadHetGeluidSkill(OVOSSkill):
                 questions,
                 correct_answers,
                 self.root_dir + round_data['main_question'],
-                round_data['question_duration']
             )
         else:
             LOG.error(f"No data found for round {round_num}")
@@ -111,7 +109,7 @@ class RaadHetGeluidSkill(OVOSSkill):
             self.gui.show_text(f"Ronde {round_num + 1}")
             self.play_audio(f"{self.root_dir}/assets/audio/effects/continue/geluid{round_num+1}.mp3", wait=True)
 
-            questions, correct_answers, main_question, question_duration = self.generate_round_data(questions_to_use[round_num])
+            questions, correct_answers, main_question, = self.generate_round_data(questions_to_use[round_num])
 
             self.play_sound_audioclip(main_question)
 
@@ -129,7 +127,8 @@ class RaadHetGeluidSkill(OVOSSkill):
                     if response in ['jazeker', 'ja zeker', 'ja zeker ja']: 
                         self.reply = 'ja'
                     elif (response == 'nee hoor'): self.reply = 'nee'
-                    elif (response == 'herhaal'): self.play_sound_audioclip(main_question, question_duration)
+                    elif (response == 'herhaal'): self.play_sound_audioclip(main_question)
+
                     else: self.speak("Dat begreep ik niet. Zeg jazeker of nee hoor. Zeg herhaal als je het geluid opnieuw wilt horen", expect_response=True, wait=True)
 
 

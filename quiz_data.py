@@ -8,7 +8,6 @@ questions_data = {
         ],
         'correct_answers': [True, False, False, False],
         'main_question': "/assets/audio/questions/Fietsbel.mp3",
-        'question_duration': 6,
     },
     1: { #Hond
         'questions': [
@@ -20,7 +19,6 @@ questions_data = {
         ],
         'correct_answers': [True, False, False, False, False],
         'main_question': "/assets/audio/questions/Hond.mp3",
-        'question_duration': 4,
     },
     2: { #Broodrooster
         'questions': [
@@ -32,7 +30,6 @@ questions_data = {
         ],
         'correct_answers': [True, False, False, False, False],
         'main_question': "/assets/audio/questions/Broodrooster.mp3",
-        'question_duration': 3,
     },
     3: { #Helicopter
         'questions': [
@@ -44,7 +41,6 @@ questions_data = {
         ],
         'correct_answers': [True, False, False, False, False],
         'main_question': "/assets/audio/questions/Helicopter.mp3",
-        'question_duration': 7,
     },
     4: { #Gitaar
         'questions': [
@@ -56,7 +52,6 @@ questions_data = {
         ],
         'correct_answers': [True, False, False, False, False],
         'main_question': "/assets/audio/questions/Gitaar.mp3",
-        'question_duration': 5,
     },
     5: { #Toetsenbord
     'questions': [
@@ -67,7 +62,6 @@ questions_data = {
     ],
     'correct_answers': [True, False, False, False],
     'main_question': "/assets/audio/questions/Typen_toetsenbord.mp3",
-    'question_duration': 4,
     },
     6: { #Schaap
     'questions': [
@@ -79,6 +73,5 @@ questions_data = {
     ],
     'correct_answers': [True, False, False, False, False],
     'main_question': "/assets/audio/questions/Schapen.mp3",
-    'question_duration': 7,
     },
 }
