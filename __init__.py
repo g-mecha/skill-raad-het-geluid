@@ -2,7 +2,6 @@ from ovos_workshop.skills import OVOSSkill
 from ovos_workshop.decorators import intent_handler
 from ovos_utils.log import LOG
 from ovos_bus_client.message import Message
-from ovos_workshop.decorators import killable_intent, killable_event
 from .quiz_data import questions_data
 import random
 
@@ -158,9 +157,9 @@ class RaadHetGeluidSkill(OVOSSkill):
 
         while self.reply == None:
             response = self.get_response("").lower()
-            if (response == 'ja'): self.play_game()
-            elif (response == 'nee'): self.end_game()
-            else: self.speak("Kies ja of nee.")            
+            if (response in ['jazeker', 'ja zeker', 'ja zeker ja']): self.play_game()
+            elif (response == 'nee hoor'): self.end_game()
+            else: self.speak("Kies jazeker of nee hoor.")            
     
 
     def end_game(self):
