@@ -88,6 +88,20 @@ class RaadHetGeluidSkill(OVOSSkill):
             self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/sfx-wrong.mp3", wait=True)
             self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/fout{message_number}.mp3", wait=True)
 
+    def get_mic_input(self):
+        response = self.get_response().lower()
+        if response in ['ja', 'jazeker', 'ja zeker', 'ja zeker ja']: 
+            return 'ja'
+        elif response in ['nee', 'nee hoor']:
+            return 'nee'
+        # elif response == "Herhaal":
+        #     return 'repeat all'
+        # elif response in ['nee', 'nee hoor']:
+        #     return 'repeat question'
+        # elif response in ['nee', 'nee hoor']:
+        #     return 'repeat sound'
+        # else: return None
+
 
     def play_game(self):
         total_rounds = 5
@@ -120,28 +134,30 @@ class RaadHetGeluidSkill(OVOSSkill):
 
                 # Keep looking for a response until we have a valid one
                 while self.reply == None:
-                    response = self.get_response().lower()
-                    # self.speak(response)
-                    if response in ['ja', 'jazeker', 'ja zeker', 'ja zeker ja']: 
-                        self.reply = 'ja'
-                    elif (response == 'nee', 'nee hoor'): self.reply = 'nee'
-                    elif (response == 'herhaal'): self.play_sound_audioclip(main_question)
-                    # End the program here when one fo the stop phrases is called
-                    # Yes we have to do this twice
-                    elif response in ['stop raad het geluid', 'stop met spelen', 'ik ben klaar']:
-                        self.end_game()
-                        return
-                    else: self.speak("Dat begreep ik niet. Zeg jazeker of nee hoor. Zeg herhaal als je het geluid opnieuw wilt horen", expect_response=True, wait=True)
+
+                    self.reply = self.get_mic_input()
+
+                    # 
+                    # # 
+
+                    # 
+                    # elif (response == 'herhaal'): self.play_sound_audioclip(main_question)
+                    # # End the program here when one fo the stop phrases is called
+                    # # Yes we have to do this twice
+                    # elif response in ['stop raad het geluid', 'stop met spelen', 'ik ben klaar']:
+                    #     self.end_game()
+                    #     return
+                    # else: self.speak("Dat begreep ik niet. Zeg jazeker of nee hoor. Zeg herhaal als je het geluid opnieuw wilt horen", expect_response=True, wait=True)
 
 
-                if self.reply == 'ja' and correct_answer:
+                if self.reply == 'yes' and correct_answer:
                     self.play_answer_response(True)
                     break
-                elif (self.reply == 'ja' and not correct_answer) or (self.reply == 'nee' and correct_answer):
+                elif (self.reply == 'yes' and not correct_answer) or (self.reply == 'no' and correct_answer):
                     self.play_answer_response(False)
                     break
                 ## Set reply to none so that the player can still play the game
-                elif (self.reply == 'nee' and not correct_answer): self.reply = None
+                elif (self.reply == 'no' and not correct_answer): self.reply = None
 
             # self.set_skip_intro(False)
 
@@ -156,9 +172,9 @@ class RaadHetGeluidSkill(OVOSSkill):
             self.play_audio(f"{self.root_dir}/assets/audio/effects/outro/einde{self.points}punten.mp3", wait=16)
 
         while self.reply == None:
-            response = self.get_response("").lower()
-            if (response in ['ja', 'jazeker', 'ja zeker', 'ja zeker ja']): self.play_game()
-            elif (response == 'nee', 'nee hoor'): self.end_game()
+            self.reply = self.get_mic_input()
+            if self.reply == 'yes': self.play_game()
+            elif (self.reply == 'no'): self.end_game()
             else: self.speak("Kies jazeker of nee hoor.")            
     
 
