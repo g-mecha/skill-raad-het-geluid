@@ -122,9 +122,9 @@ class RaadHetGeluidSkill(OVOSSkill):
                 while self.reply == None:
                     response = self.get_response().lower()
                     # self.speak(response)
-                    if response in ['js, jazeker', 'ja zeker', 'ja zeker ja']: 
+                    if response in ['ja', 'jazeker', 'ja zeker', 'ja zeker ja']: 
                         self.reply = 'ja'
-                    elif (response == 'nee, nee hoor'): self.reply = 'nee'
+                    elif (response == 'nee', 'nee hoor'): self.reply = 'nee'
                     elif (response == 'herhaal'): self.play_sound_audioclip(main_question)
                     # End the program here when one fo the stop phrases is called
                     # Yes we have to do this twice
@@ -157,8 +157,8 @@ class RaadHetGeluidSkill(OVOSSkill):
 
         while self.reply == None:
             response = self.get_response("").lower()
-            if (response in ['ja, jazeker', 'ja zeker', 'ja zeker ja']): self.play_game()
-            elif (response == 'nee, nee hoor'): self.end_game()
+            if (response in ['ja', 'jazeker', 'ja zeker', 'ja zeker ja']): self.play_game()
+            elif (response == 'nee', 'nee hoor'): self.end_game()
             else: self.speak("Kies jazeker of nee hoor.")            
     
 
