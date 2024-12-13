@@ -70,10 +70,10 @@ class RaadHetGeluidSkill(OVOSSkill):
         self.intro_played = True
         self.play_game()
 
-    def play_sound_audioclip(self, main_question):
+    def play_main_audioclip(self, main_question):
         self.play_audio(main_question, wait=True)
 
-    def play_sound_question(self, question):
+    def play_question(self, question):
         self.gui.show_text(question, override_idle=True)
         self.speak(question, wait=True)
 
@@ -93,18 +93,12 @@ class RaadHetGeluidSkill(OVOSSkill):
         if response in ['ja', 'jazeker', 'ja zeker', 'ja zeker ja']: 
             return 'yes'
         elif response in ['nee', 'nee hoor']:
-            return 'no'
-        
-        elif response == "herhaal":
-            return 'repeat all'
-        elif response in ['herhaal de vraag', 'wat was de vraag']:
-            return 'repeat question'
-        elif response in ['herhaal het geluid', 'wat was het geluid']:
-            return 'repeat sound'
-        
+            return 'no'       
+        elif response in ['herhaal', 'herhaal de vraag', 'wat was de vraag', 'herhaal het geluid', 'wat was het geluid']:
+            return 'repeat'      
         elif response in ['stop raad het geluid', 'stop met spelen', 'ik ben klaar']:
             return 'quit'
-        
+
         else: return None
 
 
@@ -130,45 +124,42 @@ class RaadHetGeluidSkill(OVOSSkill):
 
             questions, correct_answers, main_question, = self.generate_round_data(questions_to_use[round_num])
 
-            self.play_sound_audioclip(main_question)
+            self.play_main_audioclip(main_question)
 
             for question, correct_answer in zip(questions, correct_answers):
                 # Instantly end the runtime
                 if (self.player_quit == True): return
-                self.play_sound_question(question)
+                self.play_question(question)
 
                 # Keep looking for a response until we have a valid one
                 while self.reply == None:
-
                     self.reply = self.get_mic_input()
 
-                    if self.reply == 'yes' and correct_answer:
-                        self.play_answer_response(True)
-                        break
-                    elif (self.reply == 'yes' and not correct_answer) or (self.reply == 'no' and correct_answer):
-                        self.play_answer_response(False)
-                        break
-                    ## Set reply to none so that the player can still play the game
-                    elif (self.reply == 'no' and not correct_answer): self.reply = None
+                #Responce handler
+                if self.reply == 'yes' and correct_answer:
+                    self.play_answer_response(True)
+                    break
 
-                    elif (self.reply == 'repeat all'):
-                        self.play_sound_audioclip(main_question)
-                        self.play_sound_question(question)
-                        self.reply = None
-                    elif (self.reply == 'repeat question'): 
-                        self.play_sound_question(question)
-                        self.reply = None
-                    elif (self.reply == 'repeat sound'): 
-                        self.play_sound_audioclip(main_question)
-                        self.reply = None
+                elif (self.reply == 'yes' and not correct_answer) or (self.reply == 'no' and correct_answer):
+                    self.play_answer_response(False)
+                    break
 
-                    # # End the program here when one fo the stop phrases is called
-                    # # Yes we have to do this twice
-                    elif (self.reply == 'quit'):
-                        self.end_game()
-                        return
+                ## Set reply to none so that the player can still play the game
+                elif (self.reply == 'no' and not correct_answer):
+                    self.reply = None
+                    
+                elif (self.reply == 'repeat'):
+                    self.reply = None
+                    self.play_main_audioclip(main_question)
+                    self.play_question(question)
 
-                    else: self.speak("Dat begreep ik niet. Zeg jazeker of nee hoor. Zeg herhaal als je het geluid opnieuw wilt horen", expect_response=True, wait=True)
+                # End the program here when one fo the stop phrases is called
+                # Yes we have to do this twice
+                elif (self.reply == 'quit'):
+                    self.end_game()
+                    return
+
+                else: self.speak("Dat begreep ik niet. Zeg jazeker of nee hoor. Zeg herhaal als je het geluid opnieuw wilt horen", expect_response=True, wait=True)
 
             # self.set_skip_intro(False)
 
