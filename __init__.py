@@ -101,10 +101,10 @@ class RaadHetGeluidSkill(OVOSSkill):
 
         else: return None
 
-
     def play_game(self):
         total_rounds = 5
         self.player_quit = False
+        can_Exit = False
 
         # Get the number of questions in quiz_data
         numbers_of_available_questions = len(questions_data)
@@ -129,37 +129,50 @@ class RaadHetGeluidSkill(OVOSSkill):
             for question, correct_answer in zip(questions, correct_answers):
                 # Instantly end the runtime
                 if (self.player_quit == True): return
+
+                # This is ugly, but it works
+                # If the player answered a question wrong or correct,
+                # exit this question loop and to to the next one
+                if (can_Exit):
+                    can_Exit = False
+                    break
+
                 self.play_question(question)
 
-                # Keep looking for a response until we have a valid one
-                while self.reply == None:
-                    self.reply = self.get_mic_input()
+                while not can_Exit:
 
-                #Responce handler
-                if self.reply == 'yes' and correct_answer:
-                    self.play_answer_response(True)
-                    break
+                    # Keep looking for a response until we have a valid one
+                    while self.reply == None:
+                        self.reply = self.get_mic_input()
 
-                elif (self.reply == 'yes' and not correct_answer) or (self.reply == 'no' and correct_answer):
-                    self.play_answer_response(False)
-                    break
+                    #Responce handler
+                    if self.reply == 'yes' and correct_answer:
+                        self.play_answer_response(True)
+                        can_Exit = True
+                        
+                    elif (self.reply == 'yes' and not correct_answer) or (self.reply == 'no' and correct_answer):
+                        self.play_answer_response(False)
+                        can_Exit = True
 
-                ## Set reply to none so that the player can still play the game
-                elif (self.reply == 'no' and not correct_answer):
-                    self.reply = None
+                    ## Set reply to none so that the player can still play the game
+                    elif (self.reply == 'no' and not correct_answer):
+                        self.reply = None
+                        # Get out of this while loop and to the next question
+                        break
                     
-                elif (self.reply == 'repeat'):
-                    self.reply = None
-                    self.play_main_audioclip(main_question)
-                    self.play_question(question)
+                    # This took like 2-3 hours im implement correctly >:(
+                    elif (self.reply == 'repeat'):
+                        self.reply = None
+                        self.play_main_audioclip(main_question)
+                        self.play_question(question)
 
-                # End the program here when one fo the stop phrases is called
-                # Yes we have to do this twice
-                elif (self.reply == 'quit'):
-                    self.end_game()
-                    return
+                    # End the program here when one fo the stop phrases is called
+                    # Yes we have to do this twice
+                    elif (self.reply == 'quit'):
+                        self.end_game()
+                        return
 
-                else: self.speak("Dat begreep ik niet. Zeg jazeker of nee hoor. Zeg herhaal als je het geluid opnieuw wilt horen", expect_response=True, wait=True)
+                    else: self.speak("Dat begreep ik niet. Zeg jazeker of nee hoor. Zeg herhaal als je het geluid opnieuw wilt horen", expect_response=True, wait=True)
 
             # self.set_skip_intro(False)
 
