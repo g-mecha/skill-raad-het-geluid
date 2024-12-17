@@ -1,7 +1,8 @@
 from ovos_workshop.skills import OVOSSkill
-from ovos_workshop.decorators import intent_handler
+from ovos_workshop.decorators import intent_handler, conversational_intent
 from ovos_utils.log import LOG
 from ovos_bus_client.message import Message
+from ovos_yes_no_solver import YesNoSolver
 from .quiz_data import questions_data
 import random
 
@@ -21,14 +22,18 @@ class RaadHetGeluidSkill(OVOSSkill):
         #Intro variables
         self.skip_intro = True #Debug funcion, set this to False for the release version
         self.intro_played = False
+        self.state = 0
+        self.solver = YesNoSolver()
 
-#<editor-fold desc="intents">
+
+# <editor-fold desc="intents">
+
     @intent_handler("StartQuiz.intent")
     def start_quiz(self):
         self.player_quit = False
         self.play_intro()
 
-    #TODO: figure out while this still works despite intro_played being set to False
+    # TODO: figure out while this still works despite intro_played being set to False
     # @intent_handler("SkipIntro.intent")
     # def skip_intro_intent(self):
     #     if not self.intro_played:
@@ -40,7 +45,12 @@ class RaadHetGeluidSkill(OVOSSkill):
         self.player_quit = True
         self.end_game()
 
-#</editor-fold>
+    # TODO: doesn't work
+    @conversational_intent("SkipIntro.intent")
+    def state_change_test(self):
+        self.state = 1
+
+# </editor-fold>
         
     def generate_round_data(self, round_num):
         round_data = questions_data.get(round_num)
@@ -90,8 +100,13 @@ class RaadHetGeluidSkill(OVOSSkill):
 
     def get_mic_input(self):
         response = self.get_response().lower()
+        # This is what I have, hard coded answers
         if response in ['ja', 'jazeker', 'ja zeker', 'ja zeker ja']: 
             return 'yes'
+        # This is an idead what I want, iputs collected from an intentd file
+        if response in ['YesInputs.intent']: 
+            return 'yes'
+
         elif response in ['nee', 'nee hoor']:
             return 'no'       
         elif response in ['herhaal', 'herhaal de vraag', 'wat was de vraag', 'herhaal het geluid', 'wat was het geluid']:
@@ -101,10 +116,41 @@ class RaadHetGeluidSkill(OVOSSkill):
 
         else: return None
 
+    def test_func(self):   
+        if self.state == 0:
+            self.speak("0")
+        elif self.state == 1:
+            self.speak("1")
+
+    def test_utt(self, text, expected):
+        res = self.solver.match_yes_or_no(text, "nl-nl")
+        if (res == expected):
+            self.speak(f"{text} is inderdaad {expected}")
+        else: self.speak(f"{text} is niet {expected}")
+            
+
     def play_game(self):
         total_rounds = 5
         self.player_quit = False
         can_Exit = False
+
+        self.speak(True)
+
+        self.speak(False)
+
+        self.test_utt("ja", True)
+        self.test_utt("correct", True)
+        self.test_utt("klopt", True)
+        self.test_utt("jazeker", True)
+        self.test_utt("positief", True)
+        self.test_utt("Nee", False)
+        self.test_utt("incorrect", False)
+        self.test_utt("fout", False)
+        self.test_utt("nee hoor", False)
+        self.test_utt("negatief", False)
+
+
+    # <editor-fold desc="Main game logic">
 
         # Get the number of questions in quiz_data
         numbers_of_available_questions = len(questions_data)
@@ -132,7 +178,7 @@ class RaadHetGeluidSkill(OVOSSkill):
 
                 # This is ugly, but it works
                 # If the player answered a question wrong or correct,
-                # exit this question loop and to to the next one
+                # exit this set of questions and to to the next one
                 if (can_Exit):
                     can_Exit = False
                     break
@@ -141,9 +187,10 @@ class RaadHetGeluidSkill(OVOSSkill):
 
                 while not can_Exit:
 
-                    # Keep looking for a response until we have a valid one
+                    # Keep zlooking for a response until we have a valid one
                     while self.reply == None:
                         self.reply = self.get_mic_input()
+                        # self.converse()
 
                     #Responce handler
                     if self.reply == 'yes' and correct_answer:
@@ -160,7 +207,7 @@ class RaadHetGeluidSkill(OVOSSkill):
                         # Get out of this while loop and to the next question
                         break
                     
-                    # This took like 2-3 hours im implement correctly >:(
+                    # This took like half a day to implement correctly >:(
                     elif (self.reply == 'repeat'):
                         self.reply = None
                         self.play_main_audioclip(main_question)
@@ -175,6 +222,10 @@ class RaadHetGeluidSkill(OVOSSkill):
                     else: self.speak("Dat begreep ik niet. Zeg jazeker of nee hoor. Zeg herhaal als je het geluid opnieuw wilt horen", expect_response=True, wait=True)
 
             # self.set_skip_intro(False)
+
+    #</editor-fold>
+
+    # <editor-fold desc="End of game logic">
 
         if (self.player_quit == True): return
         
@@ -191,7 +242,7 @@ class RaadHetGeluidSkill(OVOSSkill):
             if self.reply == 'yes': self.play_game()
             elif (self.reply == 'no'): self.end_game()
             else: self.speak("Zeg ja om opnieuw te spelen en nee om te stopen")            
-    
+    #</editor-fold>
 
     def end_game(self):
         self.bus.emit(Message("mycroft.audio.speech.stop"))
