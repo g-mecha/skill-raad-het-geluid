@@ -77,12 +77,11 @@ class RaadHetGeluidSkill(OVOSSkill):
         self.intro_played = True
         self.play_game()
 
+    def play_question(self, question):
+        self.speak(question, wait=True)
+
     def play_main_audioclip(self, main_question):
         self.play_audio(main_question, wait=True)
-
-    def play_question(self, question):
-        self.gui.show_text(question, override_idle=True)
-        self.speak(question, wait=True)
 
     def play_answer_response(self, wasCorrect):
         self.reply = None
@@ -95,14 +94,9 @@ class RaadHetGeluidSkill(OVOSSkill):
             self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/sfx-wrong.mp3", wait=True)
             self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/fout{message_number}.mp3", wait=True)
 
-    def get_mic_input(self):
-        return self.ask_yesno(self.get_response().lower())
-
-        # if response == 'yes': 
-        #     return 'yes'
-
-        # elif response == 'no':
-        #     return 'no'       
+    def get_mic_input(self, question):
+        return self.ask_yesno(question)
+   
         # elif response in ['herhaal', 'herhaal de vraag', 'wat was de vraag', 'herhaal het geluid', 'wat was het geluid']:
         #     return 'repeat'      
         # elif response in ['stop raad het geluid', 'stop met spelen', 'ik ben klaar']:
@@ -161,14 +155,13 @@ class RaadHetGeluidSkill(OVOSSkill):
                     can_Exit = False
                     break
 
-                self.play_question(question)
+                self.gui.show_text(question, override_idle=True)
 
                 while not can_Exit:
 
                     # Keep zlooking for a response until we have a valid one
                     while self.reply == None:
-                        self.reply = self.get_mic_input()
-                        # self.converse()
+                        self.reply = self.get_mic_input(question)
 
                     #Responce handler
                     if self.reply == 'yes' and correct_answer:
@@ -215,11 +208,11 @@ class RaadHetGeluidSkill(OVOSSkill):
             self.gui.show_text(f"Je hebt {self.points} punten gescoord")
             self.play_audio(f"{self.root_dir}/assets/audio/effects/outro/einde{self.points}punten.mp3", wait=16)
 
-        while self.reply == None:
-            self.reply = self.get_mic_input()
-            if self.reply == 'yes': self.play_game()
-            elif (self.reply == 'no'): self.end_game()
-            else: self.speak("Zeg ja om opnieuw te spelen en nee om te stopen")            
+        # while self.reply == None:
+        #     self.reply = self.get_mic_input()
+        #     if self.reply == 'yes': self.play_game()
+        #     elif (self.reply == 'no'): self.end_game()
+        #     else: self.speak("Zeg ja om opnieuw te spelen en nee om te stopen")            
     #</editor-fold>
 
     def end_game(self):
