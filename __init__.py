@@ -2,7 +2,6 @@ from ovos_workshop.skills import OVOSSkill
 from ovos_workshop.decorators import intent_handler, conversational_intent
 from ovos_utils.log import LOG
 from ovos_bus_client.message import Message
-from ovos_yes_no_solver import YesNoSolver
 from .quiz_data import questions_data
 import random
 
@@ -23,8 +22,6 @@ class RaadHetGeluidSkill(OVOSSkill):
         self.skip_intro = True #Debug funcion, set this to False for the release version
         self.intro_played = False
         self.state = 0
-        self.solver = YesNoSolver()
-
 
 # <editor-fold desc="intents">
 
@@ -99,56 +96,37 @@ class RaadHetGeluidSkill(OVOSSkill):
             self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/fout{message_number}.mp3", wait=True)
 
     def get_mic_input(self):
-        response = self.get_response().lower()
-        # This is what I have, hard coded answers
-        if response in ['ja', 'jazeker', 'ja zeker', 'ja zeker ja']: 
-            return 'yes'
-        # This is an idead what I want, iputs collected from an intentd file
-        if response in ['YesInputs.intent']: 
-            return 'yes'
+        return self.ask_yesno(self.get_response().lower())
 
-        elif response in ['nee', 'nee hoor']:
-            return 'no'       
-        elif response in ['herhaal', 'herhaal de vraag', 'wat was de vraag', 'herhaal het geluid', 'wat was het geluid']:
-            return 'repeat'      
-        elif response in ['stop raad het geluid', 'stop met spelen', 'ik ben klaar']:
-            return 'quit'
+        # if response == 'yes': 
+        #     return 'yes'
 
-        else: return None
+        # elif response == 'no':
+        #     return 'no'       
+        # elif response in ['herhaal', 'herhaal de vraag', 'wat was de vraag', 'herhaal het geluid', 'wat was het geluid']:
+        #     return 'repeat'      
+        # elif response in ['stop raad het geluid', 'stop met spelen', 'ik ben klaar']:
+        #     return 'quit'
 
-    def test_func(self):   
-        if self.state == 0:
-            self.speak("0")
-        elif self.state == 1:
-            self.speak("1")
+        # else: return None
 
-    def test_utt(self, text, expected):
-        res = self.solver.match_yes_or_no(text, "nl-nl")
-        if (res == expected):
-            self.speak(f"{text} is inderdaad {expected}")
-        else: self.speak(f"{text} is niet {expected}")
+    # def test_func(self):   
+    #     if self.state == 0:
+    #         self.speak("0")
+    #     elif self.state == 1:
+    #         self.speak("1")
+
+    # def test_utt(self, text, expected):
+    #     res = self.solver.match_yes_or_no(text, "nl-nl")
+    #     if (res == expected):
+    #         self.speak(f"{text} is inderdaad {expected}")
+    #     else: self.speak(f"{text} is niet {expected}")
             
 
     def play_game(self):
         total_rounds = 5
         self.player_quit = False
         can_Exit = False
-
-        self.speak(True)
-
-        self.speak(False)
-
-        self.test_utt("ja", True)
-        self.test_utt("correct", True)
-        self.test_utt("klopt", True)
-        self.test_utt("jazeker", True)
-        self.test_utt("positief", True)
-        self.test_utt("Nee", False)
-        self.test_utt("incorrect", False)
-        self.test_utt("fout", False)
-        self.test_utt("nee hoor", False)
-        self.test_utt("negatief", False)
-
 
     # <editor-fold desc="Main game logic">
 
