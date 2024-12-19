@@ -16,7 +16,7 @@ class RaadHetGeluidSkill(OVOSSkill):
         self.player_quit = False
 
         #input variables
-        self.reply = None
+        self.reply = "None"
 
         #Intro variables
         self.intro_played = False
@@ -87,7 +87,7 @@ class RaadHetGeluidSkill(OVOSSkill):
         self.play_audio(main_question, wait=True)
 
     def play_answer_response(self, wasCorrect):
-        self.reply = None
+        self.reset_reply()
         message_number = random.randint(1, 5)
         if (wasCorrect):
             self.points+=1
@@ -99,6 +99,9 @@ class RaadHetGeluidSkill(OVOSSkill):
 
     def get_mic_input(self, question):
         return self.ask_yesno(question)
+    
+    def reset_reply(self):
+        self.reply = "None"
    
         # elif response in ['herhaal', 'herhaal de vraag', 'wat was de vraag', 'herhaal het geluid', 'wat was het geluid']:
         #     return 'repeat'      
@@ -157,7 +160,7 @@ class RaadHetGeluidSkill(OVOSSkill):
                 while not can_Exit:
 
                     # Keep zlooking for a response until we have a valid one
-                    while self.reply == None:
+                    while self.reply == "None":
                         self.reply = self.get_mic_input(question)
 
                     #Responce handler
@@ -171,13 +174,13 @@ class RaadHetGeluidSkill(OVOSSkill):
 
                     ## Set reply to none so that the player can still play the game
                     elif (self.reply == 'no' and not correct_answer):
-                        self.reply = None
+                        self.reset_reply()
                         # Get out of this while loop and to the next question
                         break
                     
                     # This took like half a day to implement correctly >:(
                     elif (self.reply == 'repeat'):
-                        self.reply = None
+                        self.reset_reply()
                         self.play_main_audioclip(main_question)
                         self.play_question(question)
 
@@ -187,8 +190,9 @@ class RaadHetGeluidSkill(OVOSSkill):
                         self.end_game()
                         return
 
-                    else: self.speak("Dat begreep ik niet. Zeg ja of nee. Zeg herhaal als je het geluid opnieuw wilt horen", expect_response=True, wait=True)
-
+                    else:
+                        self.speak("Dat begreep ik niet. Zeg ja of nee. Zeg herhaal als je het geluid opnieuw wilt horen", expect_response=True, wait=True)
+                        self.reset_reply()
             # self.set_skip_intro(False)
 
     #</editor-fold>
