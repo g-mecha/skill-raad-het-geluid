@@ -19,8 +19,11 @@ class RaadHetGeluidSkill(OVOSSkill):
         self.reply = None
 
         #Intro variables
-        self.skip_intro = True #Debug funcion, set this to False for the release version
         self.intro_played = False
+
+        #Debug funcions, set these to False for the release version
+        self.skip_intro = True 
+        self.skip_questions = True 
         self.state = 0
 
 # <editor-fold desc="intents">
@@ -109,12 +112,6 @@ class RaadHetGeluidSkill(OVOSSkill):
     #         self.speak("0")
     #     elif self.state == 1:
     #         self.speak("1")
-
-    # def test_utt(self, text, expected):
-    #     res = self.solver.match_yes_or_no(text, "nl-nl")
-    #     if (res == expected):
-    #         self.speak(f"{text} is inderdaad {expected}")
-    #     else: self.speak(f"{text} is niet {expected}")
             
 
     def play_game(self):
@@ -138,11 +135,11 @@ class RaadHetGeluidSkill(OVOSSkill):
                 break
 
             self.gui.show_text(f"Ronde {round_num + 1}")
-            self.play_audio(f"{self.root_dir}/assets/audio/effects/continue/geluid{round_num+1}.mp3", wait=True)
+            if (self.skip_questions == False): self.play_audio(f"{self.root_dir}/assets/audio/effects/continue/geluid{round_num+1}.mp3", wait=True)
 
             questions, correct_answers, main_question, = self.generate_round_data(questions_to_use[round_num])
 
-            self.play_main_audioclip(main_question)
+            if (self.skip_questions == False): self.play_main_audioclip(main_question)
 
             for question, correct_answer in zip(questions, correct_answers):
                 # Instantly end the runtime
@@ -190,7 +187,7 @@ class RaadHetGeluidSkill(OVOSSkill):
                         self.end_game()
                         return
 
-                    else: self.speak("Dat begreep ik niet. Zeg jazeker of nee hoor. Zeg herhaal als je het geluid opnieuw wilt horen", expect_response=True, wait=True)
+                    else: self.speak("Dat begreep ik niet. Zeg ja of nee. Zeg herhaal als je het geluid opnieuw wilt horen", expect_response=True, wait=True)
 
             # self.set_skip_intro(False)
 
