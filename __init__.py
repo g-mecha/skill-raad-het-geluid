@@ -46,11 +46,10 @@ class RaadHetGeluidSkill(OVOSSkill):
         self.end_game()
 
     # TODO: doesn't work
-    @conversational_intent("SkipIntro.intent")
+    @conversational_intent("RepeatQuestion.intent")
     def state_change_test(self):
         self.state = 1
-
-# </editor-fold>
+        self.speak("Herhaal")
         
     def generate_round_data(self, round_num):
         round_data = questions_data.get(round_num)
@@ -78,7 +77,16 @@ class RaadHetGeluidSkill(OVOSSkill):
             self.play_audio(f"{self.root_dir}/assets/audio/effects/intro/intro.mp3", wait=24)
 
         self.intro_played = True
+
         self.play_game()
+
+    #TODO: this is an ugly hack fix,
+    # but it will have to do untl I figure out why conversational_intents aren;t working
+    def generate_intent_arrays(self):
+        f = open(f"{self.root_dir}/locale/{self.lang.lower()}/intents/RepeatQuestion.intent", "r")
+        for x in f:
+            self.speak(x)
+        
 
     def play_question(self, question):
         self.speak(question, wait=True)
@@ -97,24 +105,19 @@ class RaadHetGeluidSkill(OVOSSkill):
             self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/sfx-wrong.mp3", wait=True)
             self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/fout{message_number}.mp3", wait=True)
 
-    def get_mic_input(self, question):
-        return self.ask_yesno(question)
+    def get_mic_input(self):
+        responce =  self.ask_yesno("")
+        self.speak(f"{responce}")
+        if (responce == 'Yes' or 'No'): return responce
+        # elif response in ['herhaal', 'herhaal de vraag', 'wat was de vraag', 'herhaal het geluid', 'wat was het geluid']:
+        #     return 'repeat'
+        # elif response in ['stop raad het geluid', 'stop met spelen', 'ik ben klaar']:
+        #     return 'quit'
+        else: return responce
+        
     
     def reset_reply(self):
         self.reply = "None"
-   
-        # elif response in ['herhaal', 'herhaal de vraag', 'wat was de vraag', 'herhaal het geluid', 'wat was het geluid']:
-        #     return 'repeat'      
-        # elif response in ['stop raad het geluid', 'stop met spelen', 'ik ben klaar']:
-        #     return 'quit'
-
-        # else: return None
-
-    # def test_func(self):   
-    #     if self.state == 0:
-    #         self.speak("0")
-    #     elif self.state == 1:
-    #         self.speak("1")
             
 
     def play_game(self):
@@ -122,102 +125,105 @@ class RaadHetGeluidSkill(OVOSSkill):
         self.player_quit = False
         can_Exit = False
 
-    # <editor-fold desc="Main game logic">
 
-        # Get the number of questions in quiz_data
-        numbers_of_available_questions = len(questions_data)
-        # Generate a random list of questions to use
-        # This function will not create duplicates
-        questions_to_use = random.sample(range(0, numbers_of_available_questions), total_rounds)
 
-        for round_num in range(0, total_rounds):
-            self.current_round = round_num
+    # # <editor-fold desc="Main game logic">
 
-            # The player has reached the end of the game, quit the loop
-            if round_num == total_rounds or self.player_quit == True:
-                break
+    #     # Get the number of questions in quiz_data
+    #     numbers_of_available_questions = len(questions_data)
+    #     # Generate a random list of questions to use
+    #     # This function will not create duplicates
+    #     questions_to_use = random.sample(range(0, numbers_of_available_questions), total_rounds)
 
-            self.gui.show_text(f"Ronde {round_num + 1}")
-            if (self.skip_questions == False): self.play_audio(f"{self.root_dir}/assets/audio/effects/continue/geluid{round_num+1}.mp3", wait=True)
+    #     for round_num in range(0, total_rounds):
+    #         self.current_round = round_num
 
-            questions, correct_answers, main_question, = self.generate_round_data(questions_to_use[round_num])
+    #         # The player has reached the end of the game, quit the loop
+    #         if round_num == total_rounds or self.player_quit == True:
+    #             break
 
-            if (self.skip_questions == False): self.play_main_audioclip(main_question)
+    #         self.gui.show_text(f"Ronde {round_num + 1}")
+    #         if (self.skip_questions == False): self.play_audio(f"{self.root_dir}/assets/audio/effects/continue/geluid{round_num+1}.mp3", wait=True)
 
-            for question, correct_answer in zip(questions, correct_answers):
-                # Instantly end the runtime
-                if (self.player_quit == True): return
+    #         questions, correct_answers, main_question, = self.generate_round_data(questions_to_use[round_num])
 
-                # This is ugly, but it works
-                # If the player answered a question wrong or correct,
-                # exit this set of questions and to to the next one
-                if (can_Exit):
-                    can_Exit = False
-                    break
+    #         if (self.skip_questions == False): self.play_main_audioclip(main_question)
 
-                self.gui.show_text(question, override_idle=True)
+    #         for question, correct_answer in zip(questions, correct_answers):
+    #             # Instantly end the runtime
+    #             if (self.player_quit == True): return
 
-                while not can_Exit:
+    #             # This is ugly, but it works
+    #             # If the player answered a question wrong or correct,
+    #             # exit this set of questions and to to the next one
+    #             if (can_Exit):
+    #                 can_Exit = False
+    #                 break
 
-                    # Keep zlooking for a response until we have a valid one
-                    while self.reply == "None":
-                        self.reply = self.get_mic_input(question)
+    #             self.gui.show_text(question, override_idle=True)
+    #             self.play_question(question)
 
-                    #Responce handler
-                    if self.reply == 'yes' and correct_answer:
-                        self.play_answer_response(True)
-                        can_Exit = True
+    #             while not can_Exit:
+
+    #                 # Keep zlooking for a response until we have a valid one
+    #                 while self.reply == "None":
+    #                     self.reply = self.get_mic_input()
+
+    #                 #Responce handler
+    #                 if self.reply == 'yes' and correct_answer:
+    #                     self.play_answer_response(True)
+    #                     can_Exit = True
                         
-                    elif (self.reply == 'yes' and not correct_answer) or (self.reply == 'no' and correct_answer):
-                        self.play_answer_response(False)
-                        can_Exit = True
+    #                 elif (self.reply == 'yes' and not correct_answer) or (self.reply == 'no' and correct_answer):
+    #                     self.play_answer_response(False)
+    #                     can_Exit = True
 
-                    ## Set reply to none so that the player can still play the game
-                    elif (self.reply == 'no' and not correct_answer):
-                        self.reset_reply()
-                        # Get out of this while loop and to the next question
-                        break
+    #                 ## Set reply to none so that the player can still play the game
+    #                 elif (self.reply == 'no' and not correct_answer):
+    #                     self.reset_reply()
+    #                     # Get out of this while loop and to the next question
+    #                     break
                     
-                    # This took like half a day to implement correctly >:(
-                    elif (self.reply == 'repeat'):
-                        self.reset_reply()
-                        self.play_main_audioclip(main_question)
-                        self.play_question(question)
+    #                 # This took like half a day to implement correctly >:(
+    #                 elif (self.reply == 'repeat'):
+    #                     self.reset_reply()
+    #                     self.play_main_audioclip(main_question)
+    #                     self.play_question(question)
 
-                    # End the program here when one fo the stop phrases is called
-                    # Yes we have to do this twice
-                    elif (self.reply == 'quit'):
-                        self.end_game()
-                        return
+    #                 # End the program here when one fo the stop phrases is called
+    #                 # Yes we have to do this twice
+    #                 elif (self.reply == 'quit'):
+    #                     self.end_game()
+    #                     return
 
-                    else:
-                        self.speak("Dat begreep ik niet. Zeg ja of nee. Zeg herhaal als je het geluid opnieuw wilt horen", expect_response=True, wait=True)
-                        self.reset_reply()
-            # self.set_skip_intro(False)
+    #                 else:
+    #                     self.speak("Dat begreep ik niet. Zeg ja of nee. Zeg herhaal als je het geluid opnieuw wilt horen", expect_response=True, wait=True)
+    #                     self.reset_reply()
+    #         # self.set_skip_intro(False)
 
-    #</editor-fold>
+    # #</editor-fold>
 
-    # <editor-fold desc="End of game logic">
+    # # <editor-fold desc="End of game logic">
 
-        if (self.player_quit == True): return
+    #     if (self.player_quit == True): return
         
-        # End of the game
-        if (self.points == 1):
-            self.gui.show_text("Je hebt een punt gescoord")
-            self.play_audio(f"{self.root_dir}/assets/audio/effects/outro/einde1punt.mp3", wait=16)
-        else:
-            self.gui.show_text(f"Je hebt {self.points} punten gescoord")
-            self.play_audio(f"{self.root_dir}/assets/audio/effects/outro/einde{self.points}punten.mp3", wait=16)
+    #     # End of the game
+    #     if (self.points == 1):
+    #         self.gui.show_text("Je hebt een punt gescoord")
+    #         self.play_audio(f"{self.root_dir}/assets/audio/effects/outro/einde1punt.mp3", wait=16)
+    #     else:
+    #         self.gui.show_text(f"Je hebt {self.points} punten gescoord")
+    #         self.play_audio(f"{self.root_dir}/assets/audio/effects/outro/einde{self.points}punten.mp3", wait=16)
 
-        # while self.reply == None:
-        #     self.reply = self.get_mic_input()
-        #     if self.reply == 'yes': self.play_game()
-        #     elif (self.reply == 'no'): self.end_game()
-        #     else: self.speak("Zeg ja om opnieuw te spelen en nee om te stopen")            
-    #</editor-fold>
+    #     # while self.reply == None:
+    #     #     self.reply = self.get_mic_input()
+    #     #     if self.reply == 'yes': self.play_game()
+    #     #     elif (self.reply == 'no'): self.end_game()
+    #     #     else: self.speak("Zeg ja om opnieuw te spelen en nee om te stopen")            
+    # #</editor-fold>
 
-    def end_game(self):
-        self.bus.emit(Message("mycroft.audio.speech.stop"))
-        self.gui.show_text("Bedankt voor het spelen")
-        self.speak("Bedankt voor het spelen van Raad het Geluid. Tot ziens!")
+    # def end_game(self):
+    #     self.bus.emit(Message("mycroft.audio.speech.stop"))
+    #     self.gui.show_text("Bedankt voor het spelen")
+    #     self.speak("Bedankt voor het spelen van Raad het Geluid. Tot ziens!")
         
