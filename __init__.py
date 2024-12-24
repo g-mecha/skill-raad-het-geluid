@@ -213,16 +213,14 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
             self.gui.show_text(f"Je hebt {self.points} punten gescoord")
             self.play_audio(f"{self.root_dir}/assets/audio/effects/outro/einde{self.points}punten.mp3", wait=16)
 
-        # while self.reply == None:
-        #     self.reply = self.get_mic_input()
-        #     if self.reply == 'yes': self.play_game()
-        #     elif (self.reply == 'no'): self.end_game()
-        #     else: self.speak("Zeg ja om opnieuw te spelen en nee om te stopen")            
+        while self.reply == None:
+            self.reply =  self.ask_yesno("")
+            if self.reply == 'yes': self.play_game()
+            elif (self.reply == 'no'): self.on_stop_game()
+            else: self.speak("Zeg ja om opnieuw te spelen en nee om te stopen")            
     #</editor-fold>
 
     def on_stop_game(self):
-        self.bus.emit(Message("mycroft.audio.speech.stop"))
-        self.bus.emit(Message(f"ovos.common_play.{self.skill_id}.stop"))
         self.gui.show_text("Bedankt voor het spelen")
         self.speak("Bedankt voor het spelen van Raad het Geluid. Tot ziens!")
 
