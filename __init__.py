@@ -1,13 +1,13 @@
-from ovos_workshop.skills import OVOSSkill
 from ovos_workshop.decorators import intent_handler, conversational_intent
 from ovos_utils.log import LOG
-from ovos_bus_client.message import Message
+from ovos_workshop.skills.game_skill import ConversationalGameSkill
+from ovos_workshop.intents import IntentBuilder
 from .quiz_data import questions_data
 import random
 
-class RaadHetGeluidSkill(OVOSSkill):
+class RaadHetGeluidSkill(ConversationalGameSkill):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(skill_voc_filename="raad_het_geluid", *args, **kwargs)
 
     def initialize(self):
         #Round variables
@@ -28,13 +28,19 @@ class RaadHetGeluidSkill(OVOSSkill):
         self.skip_questions = True 
         self.state = 0
 
+        self.generate_intent_arrays()
+
 # <editor-fold desc="intents">
 
-    @intent_handler("StartQuiz.intent")
-    def start_quiz(self):
-        self.player_quit = False
-        self.generate_intent_arrays()
+    def on_play_game(self):
         self.play_intro()
+        # if not self.is_playing:
+        #     self.speak_dialog("start.game")
+        #     self.handle_intro()
+        # else:
+        #     self.speak_dialog("already.started")
+        
+
 
     # TODO: figure out while this still works despite intro_played being set to False
     # @intent_handler("SkipIntro.intent")
@@ -53,6 +59,8 @@ class RaadHetGeluidSkill(OVOSSkill):
     def state_change_test(self):
         self.state = 1
         self.speak("Herhaal")
+
+#</editor-fold>
         
     def generate_round_data(self, round_num):
         round_data = questions_data.get(round_num)
