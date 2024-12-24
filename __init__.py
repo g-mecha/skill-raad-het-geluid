@@ -2,6 +2,7 @@ from ovos_workshop.decorators import intent_handler, conversational_intent
 from ovos_utils.log import LOG
 from ovos_workshop.skills.game_skill import ConversationalGameSkill
 from ovos_workshop.intents import IntentBuilder
+from ovos_bus_client.message import Message
 from .quiz_data import questions_data
 import random
 
@@ -13,7 +14,6 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
         #Round variables
         self.current_round = 0
         self.points = 0
-        self.player_quit = False
 
         #input variables
         self.reply = "None"
@@ -40,8 +40,6 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
         # else:
         #     self.speak_dialog("already.started")
         
-
-
     # TODO: figure out while this still works despite intro_played being set to False
     # @intent_handler("SkipIntro.intent")
     # def skip_intro_intent(self):
@@ -49,10 +47,13 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
     #         self.intro_played = True
     #         self.bus.emit(Message("mycroft.audio.speech.stop"))
 
-    @intent_handler("StopPlaying.intent")
-    def stop_playing(self):
-        self.player_quit = True
-        self.end_game()
+    def on_abandon_game(self):
+        self.log.debug("game abandoned! skill kicked out of active skill list!!!")
+        self.on_stop_game()
+
+    def on_stop_game(self):
+        self.on_stop_game()
+        
 
     # TODO: doesn't work
     @conversational_intent("RepeatQuestion.intent")
@@ -92,7 +93,6 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
         self.play_game()
 
     #TODO: this is an temp hack fix, this should use ovos logic
-    # but it will have to do untl I figure out why conversational_intents aren't working
     def generate_intent_arrays(self):
         f = open(f"{self.root_dir}/locale/{self.lang.lower()}/intents/RepeatQuestion.intent", "r")
         for intent in f:
@@ -147,7 +147,7 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
             self.current_round = round_num
 
             # The player has reached the end of the game, quit the loop
-            if round_num == total_rounds or self.player_quit == True:
+            if round_num == total_rounds:
                 break
 
             self.gui.show_text(f"Ronde {round_num + 1}")
@@ -158,8 +158,6 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
             if (self.skip_questions == False): self.play_main_audioclip(main_question)
 
             for question, correct_answer in zip(questions, correct_answers):
-                # Instantly end the runtime
-                if (self.player_quit == True): return
 
                 # If the player answered a question wrong or correct,
                 # exit this set of questions and to to the next one
@@ -198,12 +196,6 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
                         self.play_main_audioclip(main_question)
                         self.play_question(question)
 
-                    # End the program here when one fo the stop phrases is called
-                    # Yes we have to do this twice
-                    elif (self.reply == 'quit'):
-                        self.end_game()
-                        return
-
                     else:
                         self.speak("Dat begreep ik niet. Zeg ja of nee. Zeg herhaal als je het geluid opnieuw wilt horen", expect_response=True, wait=True)
                         self.reset_reply()
@@ -212,8 +204,6 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
     #</editor-fold>
 
     # <editor-fold desc="End of game logic">
-
-        if (self.player_quit == True): return
         
         # End of the game
         if (self.points == 1):
@@ -230,8 +220,10 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
         #     else: self.speak("Zeg ja om opnieuw te spelen en nee om te stopen")            
     #</editor-fold>
 
-    # def end_game(self):
-    #     self.bus.emit(Message("mycroft.audio.speech.stop"))
-    #     self.gui.show_text("Bedankt voor het spelen")
-    #     self.speak("Bedankt voor het spelen van Raad het Geluid. Tot ziens!")
+    def on_stop_game(self):
+        self.bus.emit(Message("mycroft.audio.speech.stop"))
+        self.bus.emit(Message(f"ovos.common_play.{self.skill_id}.stop"))
+        self.gui.show_text("Bedankt voor het spelen")
+        self.speak("Bedankt voor het spelen van Raad het Geluid. Tot ziens!")
+
         
