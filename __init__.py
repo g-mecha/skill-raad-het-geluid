@@ -109,13 +109,13 @@ class RaadHetGeluidSkill(OVOSSkill):
             self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/fout{message_number}.mp3", wait=True)
 
     def get_mic_input(self):
-        responce =  self.ask_yesno("")
-        if (responce == 'yes' or 'no'): return responce
-        elif responce in self.repeat_intents:
+        response =  self.ask_yesno("")
+        if (response == 'yes' or response == 'no'): return response
+        elif response in self.repeat_intents:
             return 'repeat'
         # elif response in ['stop raad het geluid', 'stop met spelen', 'ik ben klaar']:
         #     return 'quit'
-        else: return responce
+        else: return response
         
     
     def reset_reply(self):
@@ -169,8 +169,6 @@ class RaadHetGeluidSkill(OVOSSkill):
                     while self.reply == "None":
                         self.reply = self.get_mic_input()
 
-                    self.gui.show_text(f"{self.reply}")
-
                     #Responce handler
                     if self.reply == 'yes' and correct_answer:
                         self.play_answer_response(True)
@@ -199,8 +197,7 @@ class RaadHetGeluidSkill(OVOSSkill):
                         return
 
                     else:
-                        self.show_text("Dat begreep ik niet. Zeg ja of nee. Zeg herhaal als je het geluid opnieuw wilt horen", expect_response=True, wait=True)
-                        # self.speak("Dat begreep ik niet. Zeg ja of nee. Zeg herhaal als je het geluid opnieuw wilt horen", expect_response=True, wait=True)
+                        self.speak("Dat begreep ik niet. Zeg ja of nee. Zeg herhaal als je het geluid opnieuw wilt horen", expect_response=True, wait=True)
                         self.reset_reply()
             # self.set_skip_intro(False)
 
