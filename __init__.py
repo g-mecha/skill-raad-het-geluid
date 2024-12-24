@@ -221,6 +221,8 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
     #</editor-fold>
 
     def on_stop_game(self):
+        self.bus.emit(Message("mycroft.audio.speech.stop"))
+        self.bus.emit(Message(f"ovos.common_play.{self.skill_id}.stop"))
         self.gui.show_text("Bedankt voor het spelen")
         self.speak("Bedankt voor het spelen van Raad het Geluid. Tot ziens!")
 
