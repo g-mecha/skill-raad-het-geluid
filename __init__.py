@@ -128,12 +128,11 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
         elif response in ['qwerty','stop raad het geluid', 'stop met spelen', 'ik ben klaar']:
             return 'quit'
         else: return response
-        
     
     def reset_reply(self):
         self.reply = "None"
 
-    def stop(self):
+    def stop_game(self):
         self.bus.emit(Message("mycroft.audio.speech.stop"))
         self.gui.show_text("Bedankt voor het spelen")
         if (self.play_exit_message == True):
@@ -143,15 +142,11 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
         self.deactivate()
 
 
-
     def play_game(self):
-        total_rounds = 5
+        total_rounds = 1
         self.player_quit = False
         can_Exit = False
         
-
-    # <editor-fold desc="Main game logic">
-
         # Get the number of questions in quiz_data
         numbers_of_available_questions = len(questions_data)
         # Generate a random list of questions to use
@@ -217,7 +212,7 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
 
                     elif (self.reply == 'quit'):
                         # self.deactivate()
-                        self.stop()
+                        self.stop_game()
                         self.quit_game = True
                         # break
                         break
@@ -226,10 +221,6 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
                         self.speak("Dat begreep ik niet. Zeg ja of nee. Zeg herhaal als je het geluid opnieuw wilt horen", expect_response=True, wait=True)
                         self.reset_reply()
             # self.set_skip_intro(False)
-
-    #</editor-fold>
-
-    # <editor-fold desc="End of game logic">
         
         # End of the game
         if (self.points == 1):
@@ -239,13 +230,17 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
             self.gui.show_text(f"Je hebt {self.points} punten gescoord")
             self.play_audio(f"{self.root_dir}/assets/audio/effects/outro/einde{self.points}punten.mp3", wait=16)
 
-        # self.reset_reply()
-        while self.reply == None:
-            self.reply =  self.ask_yesno("")
-            if self.reply == 'yes': self.play_game()
-            elif (self.reply == 'no'): self.stop()
-            else: self.speak("Zeg ja om opnieuw te spelen en nee om te stopen")            
-    #</editor-fold>
+        while self.reply == "None":
+            self.reply = self.get_mic_input()
+            if self.reply == 'yes':
+                self.reset_varaibles()
+                self.play_game()
+            elif (self.reply == 'no'): self.stop_game()
+            else:
+                self.speak("Zeg ja om opnieuw te spelen en nee om te stopen")
+                self.reset_reply()
+
+    
 
 
 
