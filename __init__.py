@@ -143,7 +143,7 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
 
 
     def play_game(self):
-        total_rounds = 1
+        total_rounds = 5
         self.player_quit = False
         can_Exit = False
         
