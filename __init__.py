@@ -121,7 +121,7 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
             self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/fout{message_number}.mp3", wait=True)
 
     def get_mic_input(self):
-        response =  self.ask_yesno("")
+        response =  self.ask_yesno("").strip().lower()
         if (response == 'yes' or response == 'no'): return response
         elif response in self.repeat_intents:
             return 'repeat'
