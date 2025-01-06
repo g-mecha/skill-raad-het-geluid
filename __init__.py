@@ -11,9 +11,15 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
         super().__init__(skill_voc_filename="raad_het_geluid", *args, **kwargs)
 
     def initialize(self):
+        self.reset_varaibles()
+
+    def reset_varaibles(self):
         #Round variables
         self.current_round = 0
         self.points = 0
+
+        self.quit_game = False
+        self.play_exit_message = True
 
         #input variables
         self.reply = "None"
@@ -26,9 +32,9 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
         #Debug funcions, set these to False for the release version
         self.skip_intro = True 
         self.skip_questions = True 
-        self.state = 0
 
         self.generate_intent_arrays()
+
 
 # <editor-fold desc="intents">
 
@@ -48,17 +54,14 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
     #         self.bus.emit(Message("mycroft.audio.speech.stop"))
 
     def on_abandon_game(self):
+        self.play_exit_message = False
         self.log.debug("game abandoned! skill kicked out of active skill list!!!")
-        self.on_stop_game()
-
-    def on_stop_game(self):
-        self.on_stop_game()
-        
+        self.deactivate()
+        # self.stop()
 
     # TODO: doesn't work
     @conversational_intent("RepeatQuestion.intent")
     def state_change_test(self):
-        self.state = 1
         self.speak("Herhaal")
 
 #</editor-fold>
@@ -83,6 +86,7 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
             return None
 
     def play_intro(self):
+        self.reset_varaibles()
         self.gui.show_text("Raad het geluid", override_idle=True)
         # if self.intro_played:
         if self.skip_intro == False:
@@ -121,19 +125,30 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
         if (response == 'yes' or response == 'no'): return response
         elif response in self.repeat_intents:
             return 'repeat'
-        # elif response in ['stop raad het geluid', 'stop met spelen', 'ik ben klaar']:
-        #     return 'quit'
+        elif response in ['qwerty','stop raad het geluid', 'stop met spelen', 'ik ben klaar']:
+            return 'quit'
         else: return response
         
     
     def reset_reply(self):
         self.reply = "None"
-            
+
+    def stop(self):
+        self.bus.emit(Message("mycroft.audio.speech.stop"))
+        self.gui.show_text("Bedankt voor het spelen")
+        if (self.play_exit_message == True):
+            self.speak("Bedankt voor het spelen van Raad het Geluid. Tot ziens!")
+            self.play_exit_message = False
+
+        self.deactivate()
+
+
 
     def play_game(self):
         total_rounds = 5
         self.player_quit = False
         can_Exit = False
+        
 
     # <editor-fold desc="Main game logic">
 
@@ -145,6 +160,8 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
 
         for round_num in range(0, total_rounds):
             self.current_round = round_num
+
+            if (self.quit_game == True): return
 
             # The player has reached the end of the game, quit the loop
             if round_num == total_rounds:
@@ -158,6 +175,8 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
             if (self.skip_questions == False): self.play_main_audioclip(main_question)
 
             for question, correct_answer in zip(questions, correct_answers):
+
+                if (self.quit_game == True): return
 
                 # If the player answered a question wrong or correct,
                 # exit this set of questions and to to the next one
@@ -196,6 +215,13 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
                         self.play_main_audioclip(main_question)
                         self.play_question(question)
 
+                    elif (self.reply == 'quit'):
+                        # self.deactivate()
+                        self.stop()
+                        self.quit_game = True
+                        # break
+                        break
+
                     else:
                         self.speak("Dat begreep ik niet. Zeg ja of nee. Zeg herhaal als je het geluid opnieuw wilt horen", expect_response=True, wait=True)
                         self.reset_reply()
@@ -213,17 +239,14 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
             self.gui.show_text(f"Je hebt {self.points} punten gescoord")
             self.play_audio(f"{self.root_dir}/assets/audio/effects/outro/einde{self.points}punten.mp3", wait=16)
 
+        # self.reset_reply()
         while self.reply == None:
             self.reply =  self.ask_yesno("")
             if self.reply == 'yes': self.play_game()
-            elif (self.reply == 'no'): self.on_stop_game()
+            elif (self.reply == 'no'): self.stop()
             else: self.speak("Zeg ja om opnieuw te spelen en nee om te stopen")            
     #</editor-fold>
 
-    def on_stop_game(self):
-        self.bus.emit(Message("mycroft.audio.speech.stop"))
-        self.bus.emit(Message(f"ovos.common_play.{self.skill_id}.stop"))
-        self.gui.show_text("Bedankt voor het spelen")
-        self.speak("Bedankt voor het spelen van Raad het Geluid. Tot ziens!")
+
 
         
