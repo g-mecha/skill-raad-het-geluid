@@ -5,9 +5,15 @@ from ovos_workshop.intents import IntentBuilder
 from ovos_bus_client.message import Message
 from .quiz_data import questions_data
 import random
+import os.path
 
 class RaadHetGeluidSkill(ConversationalGameSkill):
     def __init__(self, *args, **kwargs):
+        # game_image = os.path.join(os.path.dirname(__file__), "gui", "all", "game.png")
+        # super().__init__(skill_voc_filename="raad_het_geluid", # <- the game name so it can be started
+        #                  skill_icon=game_image,
+        #                  game_image=game_image,
+        #                  *args, **kwargs)
         super().__init__(skill_voc_filename="raad_het_geluid", *args, **kwargs)
 
     def initialize(self):
@@ -121,7 +127,7 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
             self.play_audio(f"{self.root_dir}/assets/audio/effects/feedback/fout{message_number}.mp3", wait=True)
 
     def get_mic_input(self):
-        response =  self.ask_yesno("").strip().lower()
+        response =  self.ask_yesno("")
         if (response == 'yes' or response == 'no'): return response
         elif response in self.repeat_intents:
             return 'repeat'

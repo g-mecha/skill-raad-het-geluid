@@ -1,0 +1,28 @@
+{
+    "questions_data":
+    {
+        "fietsbel": 
+        {
+            "right_question": "Is dit een fietsbel?",
+            "incorrect_questions":
+            [
+                "Is dit een deurbel?",
+                "Is dit een koebel?",
+                "Is dit een kerstbel?"
+            ],
+            "audio_file_name" : "fietsbel"
+        },
+        
+        "Toetsenbord":
+        {
+            "right_question": "Is dit een toetsenbord?",
+            "incorrect_questions":
+            [
+                "Is dit een ventilator?",
+                "Is dit een printer?",
+                "Is dit een mobiel?"
+            ],
+            "audio_file_name" : "Typen_toetsenbord"
+        }
+    }
+}
