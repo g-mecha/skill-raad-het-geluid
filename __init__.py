@@ -6,6 +6,7 @@ from ovos_bus_client.message import Message
 from .quiz_data import questions_data
 import random
 import os.path
+import json
 
 class RaadHetGeluidSkill(ConversationalGameSkill):
     def __init__(self, *args, **kwargs):
@@ -152,7 +153,17 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
         total_rounds = 5
         self.player_quit = False
         can_Exit = False
-        
+
+        #TODO:get data from online databse 
+        # Opening JSON file
+        f = open(f'{self.root_dir}/quiz_data_0.json')
+
+        # returns JSON object as a dictionary
+        quiz_data = json.load(f)
+
+        # Closing file
+        f.close()
+
         # Get the number of questions in quiz_data
         numbers_of_available_questions = len(questions_data)
         # Generate a random list of questions to use
@@ -245,9 +256,3 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
             else:
                 self.speak("Zeg ja om opnieuw te spelen en nee om te stopen")
                 self.reset_reply()
-
-    
-
-
-
-        
