@@ -152,7 +152,7 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
     def play_game(self):
         total_rounds = 2
         self.player_quit = False
-        can_Exit = False
+        (exit_current_question_loop) = False
         self.current_round = 1
 
         #TODO:get data from online databse 
@@ -171,15 +171,6 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
         # # This function will not create duplicates
         # questions_to_use = random.sample(ranzge(0, numbers_of_available_questions), total_rounds)
 
-        # for round_num in range(0, total_rounds):
-        #     self.current_round = round_num
-
-        #     if (self.quit_game == True): return
-
-        #     # The player has reached the end of the game, quit the loop
-        #     if round_num == total_rounds:
-        #         break
-
         q = quiz_data['questions_data']
         
         for item in q:
@@ -188,7 +179,6 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
             questions = object_name['incorrect_questions'] + [right_question]
             random.shuffle(questions) # shuffle so correct isnt always the last
             audio_file_name = object_name['audio_file_name']
-            self.gui.show_text(f"{questions}")
 
         # #     if (self.quit_game == True): return
 
@@ -196,60 +186,58 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
             if (self.skip_questions == False): self.play_audio(f"{self.root_dir}/assets/audio/effects/continue/geluid{self.current_round}.mp3", wait=True)
             if (self.skip_questions == False): self.play_sound_audioclip(audio_file_name)
 
-        # #     questions, correct_answers, main_question, = self.generate_round_data(questions_to_use[round_num])
+            for question in questions:
 
-        #     for question in questions:
+                if (self.quit_game == True): return
 
-        #         if (self.quit_game == True): return
+                # If the player answered a question wrong or correct,
+                # exit this set of questions and to to the next one
+                if ((exit_current_question_loop)):
+                    (exit_current_question_loop) = False
+                    break
 
-        #         # If the player answered a question wrong or correct,
-        #         # exit this set of questions and to to the next one
-        #         if (can_Exit):
-        #             can_Exit = False
-        #             break
+                self.gui.show_text(question, override_idle=True)
+                self.play_question(question)
 
-        #         self.gui.show_text(question, override_idle=True)
-        #         self.play_question(question)
+                # This will keep us in a single question loop until the player has answered a question right or wrong
+                while not (exit_current_question_loop):
 
-        #         # This will keep us in a single question loop until the player has answered a question right or wrong
-        #         while not can_Exit:
+                    # Keep zlooking for a response until we have a valid one
+                    while self.reply == "None":
+                        self.reply = self.get_mic_input()
 
-        #             # Keep zlooking for a response until we have a valid one
-        #             while self.reply == "None":
-        #                 self.reply = self.get_mic_input()
-
-        #             #Responce handler
-        #             if self.reply == 'yes' and good_answer:
-        #                 self.play_answer_response(True)
-        #                 can_Exit = True
+                    #Responce handler
+                    if self.reply == 'yes' and question == right_question:
+                        self.play_answer_response(True)
+                        (exit_current_question_loop) = True
                         
-        #             elif (self.reply == 'yes' and not good_answer) or (self.reply == 'no' and good_answer):
-        #                 self.play_answer_response(False)
-        #                 can_Exit = True
+                    elif (self.reply == 'yes' and question != right_question) or (self.reply == 'no' and question == right_question):
+                        self.play_answer_response(False)
+                        (exit_current_question_loop) = True
 
-        #             ## Set reply to none so that the player can still play the game
-        #             elif (self.reply == 'no' and not good_answer):
-        #                 self.reset_reply()
-        #                 # Get out of this while loop and to the next question
-        #                 break
+                    ## Set reply to none so that the player can still play the game
+                    elif (self.reply == 'no' and question != right_question):
+                        self.reset_reply()
+                        # Get out of this while loop and to the next question
+                        break
                     
-        #             # This took like half a day to implement correctly >:(
-        #             elif (self.reply == 'repeat'):
-        #                 self.reset_reply()
-        #                 self.play_main_audioclip(main_question)
-        #                 self.play_question(main_question)
+                    # This took like half a day to implement correctly >:(
+                    elif (self.reply == 'repeat'):
+                        self.reset_reply()
+                        self.play_sound_audioclip(audio_file_name)
+                        self.play_question(question)
 
-        #             elif (self.reply == 'quit'):
-        #                 # self.deactivate()
-        #                 self.stop_game()
-        #                 self.quit_game = True
-        #                 # break
-        #                 break
+                    # elif (self.reply == 'quit'):
+                    #     # self.deactivate()
+                    #     self.stop_game()
+                    #     self.quit_game = True
+                    #     # break
+                    #     break
 
-        #             else:
-        #                 self.speak("Dat begreep ik niet. Zeg ja of nee. Zeg herhaal als je het geluid opnieuw wilt horen", expect_response=True, wait=True)
-        #                 self.reset_reply()
-        #     # self.set_skip_intro(False)
+                    else:
+                        self.speak("Dat begreep ik niet. Zeg ja of nee. Zeg herhaal als je het geluid opnieuw wilt horen", expect_response=True, wait=True)
+                        self.reset_reply()
+            # self.set_skip_intro(False)
         
         # # End of the game
         # if (self.points == 1):
