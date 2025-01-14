@@ -38,7 +38,7 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
 
         #Debug funcions, set these to False for the release version
         self.skip_intro = True 
-        self.skip_questions = True 
+        self.skip_questions = False 
 
         self.generate_intent_arrays()
 
@@ -113,8 +113,8 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
     def play_question(self, question):
         self.speak(question, wait=True)
 
-    def play_main_audioclip(self, main_question):
-        self.play_audio(main_question, wait=True)
+    def play_sound_audioclip(self, audio_clip):
+        self.play_audio(f"{self.root_dir}/assets/audio/questions/{audio_clip}.mp3", wait=True)
 
     def play_answer_response(self, wasCorrect):
         self.reset_reply()
@@ -171,6 +171,15 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
         # # This function will not create duplicates
         # questions_to_use = random.sample(ranzge(0, numbers_of_available_questions), total_rounds)
 
+        # for round_num in range(0, total_rounds):
+        #     self.current_round = round_num
+
+        #     if (self.quit_game == True): return
+
+        #     # The player has reached the end of the game, quit the loop
+        #     if round_num == total_rounds:
+        #         break
+
         q = quiz_data['questions_data']
         
         for item in q:
@@ -183,9 +192,9 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
 
         # #     if (self.quit_game == True): return
 
-        #     self.gui.show_text(f"Ronde {self.current_round}")
-        #     if (self.skip_questions == False): self.play_audio(f"{self.root_dir}/assets/audio/effects/continue/geluid{self.current_round}.mp3", wait=True)
-        #     if (self.skip_questions == False): self.play_main_audioclip(audio_file_name)
+            self.gui.show_text(f"Ronde {self.current_round}")
+            if (self.skip_questions == False): self.play_audio(f"{self.root_dir}/assets/audio/effects/continue/geluid{self.current_round}.mp3", wait=True)
+            if (self.skip_questions == False): self.play_sound_audioclip(audio_file_name)
 
         # #     questions, correct_answers, main_question, = self.generate_round_data(questions_to_use[round_num])
 
