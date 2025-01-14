@@ -23,6 +23,19 @@
                 "Is dit een mobiel?"
             ],
             "audio_file_name" : "Typen_toetsenbord"
+        },
+
+        "Hond": 
+        {
+            "right_question":  "Is dit een hond?",
+            "incorrect_questions":
+            [
+                "Is dit een kat?",
+                "Is dit een hamster?",
+                "Is dit een slang?",
+                "Is dit een goudvis?"
+            ],
+            "audio_file_name" : "Hond"
         }
     }
 }

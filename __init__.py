@@ -171,9 +171,15 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
         # questions_to_use = random.sample(ranzge(0, numbers_of_available_questions), total_rounds)
 
         q = quiz_data['questions_data']
+        q_copy = []
         
         for item in q:
-            object_name = q[item]
+            q_copy.append(item)
+
+        random.shuffle(q_copy)
+        
+        for object in q_copy:  
+            object_name = q[object]
             right_question = object_name['right_question']
             questions = object_name['incorrect_questions'] + [right_question]
             random.shuffle(questions) # shuffle so correct isnt always the last
