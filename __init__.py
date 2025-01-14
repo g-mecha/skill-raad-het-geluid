@@ -22,7 +22,7 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
 
     def reset_varaibles(self):
         #Round variables
-        self.current_round = 0
+        self.current_round = 1
         self.points = 0
 
         self.quit_game = False
@@ -118,6 +118,7 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
 
     def play_answer_response(self, wasCorrect):
         self.reset_reply()
+        self.current_round+=1
         message_number = random.randint(1, 5)
         if (wasCorrect):
             self.points+=1
@@ -150,10 +151,8 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
 
 
     def play_game(self):
-        total_rounds = 2
         self.player_quit = False
-        (exit_current_question_loop) = False
-        self.current_round = 1
+        exit_current_question_loop = False
 
         #TODO:get data from online databse 
         # Opening JSON file
@@ -239,20 +238,20 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
                         self.reset_reply()
             # self.set_skip_intro(False)
         
-        # # End of the game
-        # if (self.points == 1):
-        #     self.gui.show_text("Je hebt een punt gescoord")
-        #     self.play_audio(f"{self.root_dir}/assets/audio/effects/outro/einde1punt.mp3", wait=16)
-        # else:
-        #     self.gui.show_text(f"Je hebt {self.points} punten gescoord")
-        #     self.play_audio(f"{self.root_dir}/assets/audio/effects/outro/einde{self.points}punten.mp3", wait=16)
+        # End of the game
+        if (self.points == 1):
+            self.gui.show_text("Je hebt een punt gescoord")
+            self.play_audio(f"{self.root_dir}/assets/audio/effects/outro/einde1punt.mp3", wait=16)
+        else:
+            self.gui.show_text(f"Je hebt {self.points} punten gescoord")
+            self.play_audio(f"{self.root_dir}/assets/audio/effects/outro/einde{self.points}punten.mp3", wait=16)
 
-        # while self.reply == "None":
-        #     self.reply = self.get_mic_input()
-        #     if self.reply == 'yes':
-        #         self.reset_varaibles()
-        #         self.play_game()
-        #     elif (self.reply == 'no'): self.stop_game()
-        #     else:
-        #         self.speak("Zeg ja om opnieuw te spelen en nee om te stopen")
-        #         self.reset_reply()
+        while self.reply == "None":
+            self.reply = self.get_mic_input()
+            if self.reply == 'yes':
+                self.reset_varaibles()
+                self.play_game()
+            elif (self.reply == 'no'): self.stop_game()
+            else:
+                self.speak("Zeg ja om opnieuw te spelen en nee om te stopen")
+                self.reset_reply()
