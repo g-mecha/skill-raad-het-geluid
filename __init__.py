@@ -1,9 +1,6 @@
 from ovos_workshop.decorators import intent_handler, conversational_intent
-from ovos_utils.log import LOG
 from ovos_workshop.skills.game_skill import ConversationalGameSkill
-from ovos_workshop.intents import IntentBuilder
 from ovos_bus_client.message import Message
-from .quiz_data import questions_data
 import random
 import os.path
 import json
@@ -72,25 +69,6 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
         self.speak("Herhaal")
 
 #</editor-fold>
-        
-    def generate_round_data(self, round_num):
-        round_data = questions_data.get(round_num)
-        if round_data:
-            questions = round_data['questions']
-            correct_answers = round_data['correct_answers']
-
-            combined = list(zip(questions, correct_answers))
-            random.shuffle(combined)
-            questions, correct_answers = zip(*combined)
-
-            return (
-                questions,
-                correct_answers,
-                self.root_dir + round_data['main_question'],
-            )
-        else:
-            LOG.error(f"No data found for round {round_num}")
-            return None
 
     def play_intro(self):
         self.reset_varaibles()
@@ -156,19 +134,13 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
 
         #TODO:get data from online databse 
         # Opening JSON file
-        f = open(f'{self.root_dir}/quiz_data_0.json')
+        f = open(f'{self.root_dir}/quiz_data.json')
 
         # returns JSON object as a dictionary
         quiz_data = json.load(f)
 
         # Closing file
         f.close()
-
-        # # Get the number of questions in quiz_data
-        # numbers_of_available_questions = len(questions_data)
-        # # Generate a random list of questions to use
-        # # This function will not create duplicates
-        # questions_to_use = random.sample(ranzge(0, numbers_of_available_questions), total_rounds)
 
         q = quiz_data['questions_data']
         q_copy = []
@@ -197,15 +169,15 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
 
                 # If the player answered a question wrong or correct,
                 # exit this set of questions and to to the next one
-                if ((exit_current_question_loop)):
-                    (exit_current_question_loop) = False
+                if (exit_current_question_loop == True):
+                    exit_current_question_loop = False
                     break
 
                 self.gui.show_text(question, override_idle=True)
                 self.play_question(question)
 
                 # This will keep us in a single question loop until the player has answered a question right or wrong
-                while not (exit_current_question_loop):
+                while not exit_current_question_loop:
 
                     # Keep zlooking for a response until we have a valid one
                     while self.reply == "None":
