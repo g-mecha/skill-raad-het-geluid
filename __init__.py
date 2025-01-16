@@ -110,7 +110,7 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
         if not self.is_playing:
             return 
 
-        response =  self.ask_yesno("")
+        response =  self.ask_yesno("").lower().strip()
         if (response == 'yes' or response == 'no'): return response
         elif response in self.repeat_intents:
             return 'repeat'
@@ -242,9 +242,9 @@ class RaadHetGeluidSkill(ConversationalGameSkill):
     def on_stop_game(self):
         # self.bus.emit(Message("mycroft.audio.speech.stop"))
         self.gui.show_text("Bedankt voor het spelen")
-        if (self.play_exit_message == True):
-            self.speak("Bedankt voor het spelen van Raad het Geluid. Tot ziens!")
-            self.play_exit_message = False
+        # if (self.play_exit_message == True):
+        #     self.speak("Bedankt voor het spelen van Raad het Geluid. Tot ziens!")
+        #     self.play_exit_message = False
 
     def on_save_game(self):
         """if your game has no save/load functionality you should
